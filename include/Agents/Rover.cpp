@@ -15,9 +15,9 @@ Rover::Rover(size_t n, size_t nPop, string evalFunc): nSteps(n), popSize(nPop){
 		isD = false ;
 	}
 	windowSize = nSteps/10 ; // hardcoded running average window size to be 1/10 of full experimental run
-	rThreshold.push_back(0.01) ;
-	rThreshold.push_back(0.3) ; // hardcoded reward threshold, D logs for 1000 step executions suggest this is a good value
-	pomdpAction = 0 ; // initial action is always to not ask for help
+	//rThreshold.push_back(0.01) ;
+	//rThreshold.push_back(0.3) ; // hardcoded reward threshold, D logs for 1000 step executions suggest this is a good value
+	//pomdpAction = 0 ; // initial action is always to not ask for help
 	stateObsUpdate = false ; // true if human assistance has redefined NN control policy state calculation
 }
 
@@ -52,9 +52,11 @@ void Rover::InitialiseNewLearningEpoch(vector<Target> pois, Vector2d xy, double 
 	currentXY = initialXY ;
 	currentPsi = initialPsi ;
 
+	/*
 	// Reinitialise expertise POMDP properties
 	pomdpAction = 0 ;
 	stateObsUpdate = false ;
+	*/
 }
 
 void Rover::ResetStepwiseEval(){
@@ -136,6 +138,7 @@ void Rover::OutputNNs(char * A){
 	NNFile.close() ;
 }
 
+/*
 void Rover::SetPOMDPPolicy(POMDP * pomdp){
 	expertisePOMDP = pomdp ;
 	belief = expertisePOMDP->GetBelief() ;
@@ -165,6 +168,7 @@ size_t Rover::ComputePOMDPAction(){
 	}
 	return pomdpAction ;
 }
+*/
 
 double Rover::GetAverageR(){
 	// Calculate reward observation from running average
@@ -184,7 +188,7 @@ void Rover::UpdateNNStateInputCalculation(bool update, size_t gID){
 	POIs.clear() ;
 	POIs.push_back(newPOIs[0]) ; // remove all other POIs from consideration in the state
 	runningAvgR.clear() ; // restart running average calculation window
-	pomdpAction = 0 ; // reset pomdp action
+	//pomdpAction = 0 ; // reset pomdp action
 }
 
 double MinMaxDistort(double d1, double d2, double dist)

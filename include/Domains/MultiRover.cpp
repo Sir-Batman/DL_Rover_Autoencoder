@@ -184,6 +184,7 @@ void MultiRover::SimulateEpoch(bool train){
   std::cout << "max achieved value: " << maxEval << "...\n" ;
 }
 
+/*
 void MultiRover::SimulateEpoch(size_t goalPOI, char * env, char * policy, VectorXd prior){
   size_t teamSize ;
   teamSize = nPop ; // inquiry simulation is always in test mode
@@ -326,6 +327,7 @@ void MultiRover::SimulateEpoch(size_t goalPOI, char * env, char * policy, Vector
   // Print best team performance
   std::cout << "max achieved value: " << maxEval << "...\n" ;
 }
+*/
 
 void MultiRover::EvolvePolicies(bool init){
   for (size_t i = 0; i < nRovers; i++)
@@ -374,6 +376,7 @@ void MultiRover::OutputControlPolicies(char * A){
     roverTeam[i]->OutputNNs(A) ;
 }
 
+/*
 // Wrapper for writing POMDP actions to specified file
 void MultiRover::OutputQueries(char * A){
 	// Filename to write to stored in A
@@ -397,7 +400,7 @@ void MultiRover::OutputBeliefs(char * A){
   
   outputBlf = true ;
 }
-
+*/
 // Wrapper for writing running average of stepwiseD to specified file
 void MultiRover::OutputAverageStepwise(char * A){
 	// Filename to write to stored in A
@@ -476,6 +479,7 @@ void MultiRover::ExecutePolicies(char * readFile, char * storeTraj, char * store
   }
 }
 
+/*
 void MultiRover::ExecutePolicies(char * readFile, char * storeTraj, char * storePOI, char * storeEval, char * storeQury, char * storeBlf, size_t numIn, size_t numOut, size_t numHidden, size_t goalPOI, char * pomdpEnv, char * pomdpPolicy, VectorXd prior){
   // Filename to read NN control policy
 	std::stringstream fileName ;
@@ -544,6 +548,7 @@ void MultiRover::ExecutePolicies(char * readFile, char * storeTraj, char * store
     loadedNN[i] = 0 ;
   }
 }
+*/
 
 void MultiRover::ExecutePolicies(char * expFile, char * novFile, char * storeTraj, char * storePOI, char* storeEval, size_t numIn, size_t numOut, size_t numHidden){
   // Filename to read expert NN control policies

@@ -12,7 +12,7 @@
 #include <iostream>
 
 #include "Agents/Rover.h"
-#include "POMDPs/POMDP.h"
+//#include "POMDPs/POMDP.h"
 #include "Target/Target.h"
 
 using std::string ;
@@ -41,7 +41,7 @@ class MultiRover{
     
     void ExecutePolicies(char * readFile, char * storeTraj, char * storePOI, char * storeEval, size_t numIn, size_t numOut, size_t numHidden) ; // read in control policies and execute in random world, store trajectory and POI results in second and third inputs, team performance stored in fourth input, fifth-seventh inputs define NN structure
     
-    void ExecutePolicies(char * readFile, char * storeTraj, char * storePOI, char * storeEval, char * storeQury, char* storeBlf, size_t numIn, size_t numOut, size_t numHidden, size_t goalPOI, char * pomdpEnv, char * pomdpPolicy, VectorXd prior) ; // goalPOI observation triggers mission change, {pomdpEnv file stores POMDP environment, pomdpPolicy stores pomdp policy, prior stores prior belief} for determining inquiry action based on policy expertise belief
+    //void ExecutePolicies(char * readFile, char * storeTraj, char * storePOI, char * storeEval, char * storeQury, char* storeBlf, size_t numIn, size_t numOut, size_t numHidden, size_t goalPOI, char * pomdpEnv, char * pomdpPolicy, VectorXd prior) ; // goalPOI observation triggers mission change, {pomdpEnv file stores POMDP environment, pomdpPolicy stores pomdp policy, prior stores prior belief} for determining inquiry action based on policy expertise belief
     
     void ExecutePolicies(char * expFile, char * novFile, char * storeTraj, char * storePOI, char* storeEval, size_t numIn, size_t numOut, size_t numHidden) ; // read in expert and novice control policies and execute in random world, store trajectory and POI results in second and third inputs, team performance stored in fourth input, fifth-seventh inputs define NN structure
   protected:
