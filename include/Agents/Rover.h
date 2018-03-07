@@ -8,7 +8,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include <stdexcept>
+#include <cmath>
 #include <math.h>
 #include <float.h>
 #include <Eigen/Eigen>
@@ -31,6 +31,8 @@ class Rover{
 	public:
 		Rover(size_t n, size_t nPop, string evalFunc) ;
 		~Rover() ;
+
+		void computeLaserData(double distance, double theta, double object_radius, std::vector<double>& laserData);
 
 		void ResetEpochEvals() ;
 		void InitialiseNewLearningEpoch(vector<Target>, Vector2d, double) ;
@@ -92,12 +94,13 @@ class Rover{
 template <class T>
 void printVector(std::vector<T> v, std::ostream& stream){
 
+	stream << "[";
     stream << v[0];
 
     for (size_t i = 1; i < v.size(); ++i){
         stream << ", " << v[i];
     }
-    stream << "\n";
+    stream << "]\n";
 
 }
 

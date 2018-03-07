@@ -290,7 +290,9 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	// Compute POI 360 Laser Scan Data
 
 	// Maximum distance of Laser Scan Data
-	double LASER_DIST_MAX = 500;
+	double LASER_DIST_MAX = 500.0;
+	double POI_RADIUS = 1.0;
+	double ROVER_RADIUS = 1.0;
 
 	// Initialization of POI Laser Scan
 	std::vector<double> POI_Angles(360, LASER_DIST_MAX);
@@ -305,32 +307,13 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		POIv = POIs[i].GetLocation() - currentXY ;
 		Vector2d POIbody = Global2Body*POIv ;
 		Vector2d diff = currentXY - POIbody ;
+
+		// distance between the centers of our object and the POI
 		double d = diff.norm() ;
+		// angle between our object and POI
 		double theta = atan2(POIbody(1),POIbody(0)) ;
 
-		double theta_deg = theta * 180 / PI;
-
-		// Normalize angle to range [0, 360] rather than [-180, 180]
-		theta_deg += 180;
-
-		// Round angle to closest integer
-		int angle = std::nearbyint(theta_deg);
-
-		// Check to see if angle loops back
-		if (angle >= 360){
-			angle -= 360;
-		}
-
-		if ((angle < 0) | (angle > 359)){
-			std::cerr << "Angle was below or above expected bounds. Angle Value: " << std::to_string(angle) << std::endl;
-			throw std::runtime_error("Angle was below or above expected bounds. Angle = " + std::to_string(angle));
-		}
-
-		// if POI in range, log it
-		if (d < LASER_DIST_MAX){
-			POI_Angles[angle] = d;
-		}
-
+		computeLaserData(d, theta, POI_RADIUS, POI_Angles);
 
 	}
 
@@ -391,7 +374,6 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	// Placeholder for each Rover vector rovV preinitialized above
 	rovV.setZero(2,1) ;
 
-
 	for (size_t i = 0; i < jointState.size(); i++){
 		if (i != ind){
 			rovV = jointState[i] - currentXY ;
@@ -399,30 +381,12 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			Vector2d diff = currentXY - rovBody ;
 			double d = diff.norm() ;
 			double theta = atan2(rovBody(1),rovBody(0)) ;
-			double theta_deg = theta * 180 / PI;
 
-			// Normalize angle to range [0, 360] rather than [-180, 180]
-			theta_deg += 180;
+			computeLaserData(d, theta, ROVER_RADIUS, ROV_Angles);
 
-			// Round angle to closest integer
-			int angle = std::nearbyint(theta_deg);
-
-			// Check to see if angle loops back
-			if (angle >= 360){
-				angle -= 360;
-			}
-
-			if ((angle < 0) | (angle > 359)){
-				std::cerr << "Angle was below or above expected bounds. Angle Value: " << std::to_string(angle) << std::endl;
-				throw std::runtime_error("Angle was below or above expected bounds. Angle = " + std::to_string(angle));
-			}
-
-			// if POI in range, log it
-			if (d < LASER_DIST_MAX){
-				ROV_Angles[angle] = d;
-			}
 		}
 	}
+
 	std::cout << "\nPOI Angles: ";
 	printVector(POI_Angles, std::cout);
 
@@ -430,6 +394,39 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	printVector(ROV_Angles, std::cout);
 
 	return s ;
+}
+
+void Rover::computeLaserData(double distance, double theta, double object_radius, std::vector<double>& laserData){
+	// the angle from theta 
+	// from which the object will return laser information (in radians)
+	double angles_covered = object_radius/distance;
+
+	// Convert to Degrees and normalize angle to range [0, 360] rather than [-180, 180]
+	double theta_deg = (theta * 180 / PI) + 180;		
+	double angles_covered_deg = angles_covered * 180 / PI;
+
+	// Compute the bounds of the angles that will be affected
+	int lower_bound = theta_deg - angles_covered_deg;
+	int upper_bound = theta_deg + angles_covered_deg;
+
+	// Loop from lower to upper bound and consider the integer angles
+	// Note: <= was used in loop comparison in order to account for lower_bound == upper bound
+	for (int i = lower_bound; i <= upper_bound; ++i){
+
+		// Assuming roughly round object, compute the laser return signal
+		// estimated distance = distance from centers - radius of object ^ (degrees off center)
+		double dist = distance - object_radius * std::pow(0.5, std::abs(theta_deg - i));
+
+		// If no closer object has been detected, update the laser scan data
+		if (dist < laserData[i % 360]){
+			laserData[i % 360] = dist;
+		}
+	}
+
+	// int angle = std::round(theta_deg);
+	// if (distance < laserData[angle % 360]){
+	// 	glaserData[angle % 360] = distance;
+	// }
 }
 
 Matrix2d Rover::RotationMatrix(double psi){
