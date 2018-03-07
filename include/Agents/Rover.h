@@ -90,14 +90,14 @@ class Rover{
 } ;
 
 template <class T>
-void printVector(std::vector<T> v){
+void printVector(std::vector<T> v, std::ostream& stream){
 
-    std::cout << v[0];
+    stream << v[0];
 
     for (size_t i = 1; i < v.size(); ++i){
-        std::cout << ", " << v[i];
+        stream << ", " << v[i];
     }
-    std::cout << "\n";
+    stream << "\n";
 
 }
 

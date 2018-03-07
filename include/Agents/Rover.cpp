@@ -423,11 +423,11 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			}
 		}
 	}
-	std::cout << "\nPOI Angles";
-	printVector(POI_Angles);
+	std::cout << "\nPOI Angles: ";
+	printVector(POI_Angles, std::cout);
 
-	std::cout << "\nROV Angles";
-	printVector(ROV_Angles);
+	std::cout << "\nROV Angles: ";
+	printVector(ROV_Angles, std::cout);
 
 	return s ;
 }
