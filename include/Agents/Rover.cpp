@@ -285,6 +285,57 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 
 		s(q) += ScalingV*POIs[i].GetValue()/max(d,1.0) ;
 	}
+
+
+	// Compute POI 360 Laser Scan Data
+
+	// Maximum distance of Laser Scan Data
+	double LASER_DIST_MAX = 500;
+
+	// Initialization of POI Laser Scan
+	std::vector<double> POI_Angles(360, LASER_DIST_MAX);
+
+	// Placeholder for each POI vector POIv preinitialized above
+	POIv.setZero(2,1) ;
+
+	for (size_t i = 0; i < POIs.size(); i++){
+
+		// Compute relative angle and distance
+		// Taken from Jen Jen's code (hope it's correct)
+		POIv = POIs[i].GetLocation() - currentXY ;
+		Vector2d POIbody = Global2Body*POIv ;
+		Vector2d diff = currentXY - POIbody ;
+		double d = diff.norm() ;
+		double theta = atan2(POIbody(1),POIbody(0)) ;
+
+		double theta_deg = theta * 180 / PI;
+
+		// Normalize angle to range [0, 360] rather than [-180, 180]
+		theta_deg += 180;
+
+		// Round angle to closest integer
+		int angle = std::nearbyint(theta_deg);
+
+		// Check to see if angle loops back
+		if (angle >= 360){
+			angle -= 360;
+		}
+
+		if ((angle < 0) | (angle > 359)){
+			std::cerr << "Angle was below or above expected bounds. Angle Value: " << std::to_string(angle) << std::endl;
+			throw std::runtime_error("Angle was below or above expected bounds. Angle = " + std::to_string(angle));
+		}
+
+		// if POI in range, log it
+		if (d < LASER_DIST_MAX){
+			POI_Angles[angle] = d;
+		}
+
+
+	}
+
+
+
 	//std::cout << "State: [" << s[0] << "," << s[1] << "," << s[2] << "," << s[3] << "]\n" ;
 
 	// Compute rover observation states
@@ -330,7 +381,53 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			s(q) += 1.0/max(d,1.0) ;
 		}
 	}
-	//std::cout << "Final State:\n" << s << std::endl;
+	
+
+	// Compute Rover 360 Laser Data
+
+	// Initialization of ROV Laser Scan
+	std::vector<double> ROV_Angles(360, LASER_DIST_MAX);
+
+	// Placeholder for each Rover vector rovV preinitialized above
+	rovV.setZero(2,1) ;
+
+
+	for (size_t i = 0; i < jointState.size(); i++){
+		if (i != ind){
+			rovV = jointState[i] - currentXY ;
+			Vector2d rovBody = Global2Body*rovV ;
+			Vector2d diff = currentXY - rovBody ;
+			double d = diff.norm() ;
+			double theta = atan2(rovBody(1),rovBody(0)) ;
+			double theta_deg = theta * 180 / PI;
+
+			// Normalize angle to range [0, 360] rather than [-180, 180]
+			theta_deg += 180;
+
+			// Round angle to closest integer
+			int angle = std::nearbyint(theta_deg);
+
+			// Check to see if angle loops back
+			if (angle >= 360){
+				angle -= 360;
+			}
+
+			if ((angle < 0) | (angle > 359)){
+				std::cerr << "Angle was below or above expected bounds. Angle Value: " << std::to_string(angle) << std::endl;
+				throw std::runtime_error("Angle was below or above expected bounds. Angle = " + std::to_string(angle));
+			}
+
+			// if POI in range, log it
+			if (d < LASER_DIST_MAX){
+				ROV_Angles[angle] = d;
+			}
+		}
+	}
+	std::cout << "\nPOI Angles";
+	printVector(POI_Angles);
+
+	std::cout << "\nROV Angles";
+	printVector(ROV_Angles);
 
 	return s ;
 }
