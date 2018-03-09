@@ -45,12 +45,6 @@ class Rover{
 		void OutputNNs(char *) ;
 		NeuroEvo * GetNEPopulation(){return RoverNE ;}
 
-		/*
-		   void SetPOMDPPolicy(POMDP * pomdp) ;
-		   POMDP * GetPOMDPPolicy(){return expertisePOMDP ;}
-		   VectorXd GetPOMDPBelief(){return belief ;}
-		   size_t ComputePOMDPAction() ;
-		   */
 		void UpdateNNStateInputCalculation(bool, size_t) ;
 		bool IsStateObsUpdated(){return stateObsUpdate ;}
 
@@ -77,13 +71,6 @@ class Rover{
 
 		VectorXd ComputeNNInput(vector<Vector2d>) ;
 		Matrix2d RotationMatrix(double) ;
-
-		/*
-		   size_t pomdpAction ;
-		   vector<double> rThreshold ;
-		   POMDP * expertisePOMDP ;
-		   VectorXd belief ;
-		   */
 
 		bool stateObsUpdate ;
 		size_t goalPOI ;
