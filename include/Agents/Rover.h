@@ -15,7 +15,7 @@
 #include "Learning/NeuroEvo.h"
 #include "Utilities/Utilities.h"
 #include "Target/Target.h"
-#include "POMDPs/POMDP.h"
+//#include "POMDPs/POMDP.h"
 
 #ifndef PI
 #define PI 3.14159265358979323846264338328
@@ -48,10 +48,6 @@ class Rover{
 		void OutputNNs(char *) ;
 		NeuroEvo * GetNEPopulation(){return RoverNE ;}
 
-		void SetPOMDPPolicy(POMDP * pomdp) ;
-		POMDP * GetPOMDPPolicy(){return expertisePOMDP ;}
-		VectorXd GetPOMDPBelief(){return belief ;}
-		size_t ComputePOMDPAction() ;
 		void UpdateNNStateInputCalculation(bool, size_t) ;
 		bool IsStateObsUpdated(){return stateObsUpdate ;}
 
@@ -78,11 +74,6 @@ class Rover{
 
 		VectorXd ComputeNNInput(vector<Vector2d>) ;
 		Matrix2d RotationMatrix(double) ;
-
-		size_t pomdpAction ;
-		vector<double> rThreshold ;
-		POMDP * expertisePOMDP ;
-		VectorXd belief ;
 
 		bool stateObsUpdate ;
 		size_t goalPOI ;

@@ -15,9 +15,6 @@ Rover::Rover(size_t n, size_t nPop, string evalFunc): nSteps(n), popSize(nPop){
 		isD = false ;
 	}
 	windowSize = nSteps/10 ; // hardcoded running average window size to be 1/10 of full experimental run
-	rThreshold.push_back(0.01) ;
-	rThreshold.push_back(0.3) ; // hardcoded reward threshold, D logs for 1000 step executions suggest this is a good value
-	pomdpAction = 0 ; // initial action is always to not ask for help
 	stateObsUpdate = false ; // true if human assistance has redefined NN control policy state calculation
 }
 
@@ -51,10 +48,6 @@ void Rover::InitialiseNewLearningEpoch(vector<Target> pois, Vector2d xy, double 
 
 	currentXY = initialXY ;
 	currentPsi = initialPsi ;
-
-	// Reinitialise expertise POMDP properties
-	pomdpAction = 0 ;
-	stateObsUpdate = false ;
 }
 
 void Rover::ResetStepwiseEval(){
@@ -136,35 +129,6 @@ void Rover::OutputNNs(char * A){
 	NNFile.close() ;
 }
 
-void Rover::SetPOMDPPolicy(POMDP * pomdp){
-	expertisePOMDP = pomdp ;
-	belief = expertisePOMDP->GetBelief() ;
-}
-
-size_t Rover::ComputePOMDPAction(){
-	// Wait for sufficient reward observations
-	if (runningAvgR.size() == windowSize){
-		// Calculate reward observation from running average
-		double avgSum = GetAverageR() ;
-
-		// Convert to discrete observation for POMDP interface
-		size_t obs ;
-		if (avgSum <= rThreshold[0])
-			obs = 0 ;
-		else if (avgSum < rThreshold[1])
-			obs = 1 ;
-		else
-			obs = 2 ;
-
-		// Updated POMDP with latest observation
-		expertisePOMDP->UpdateBelief(pomdpAction, obs) ;
-		belief = expertisePOMDP->GetBelief() ;
-
-		// Compute next action
-		pomdpAction = expertisePOMDP->GetBestAction() ;
-	}
-	return pomdpAction ;
-}
 
 double Rover::GetAverageR(){
 	// Calculate reward observation from running average
@@ -184,7 +148,6 @@ void Rover::UpdateNNStateInputCalculation(bool update, size_t gID){
 	POIs.clear() ;
 	POIs.push_back(newPOIs[0]) ; // remove all other POIs from consideration in the state
 	runningAvgR.clear() ; // restart running average calculation window
-	pomdpAction = 0 ; // reset pomdp action
 }
 
 double MinMaxDistort(double d1, double d2, double dist)
@@ -219,7 +182,7 @@ double GaussDistort(double d1, double d2, double dist)
 	result = (n/(d1+d2)) * exp( -(pow(dist-d1,2)/n + (pow(dist-d2,2)/n)));
 	return result;
 }
-	
+
 
 // Compute the NN input state given the rover locations and the POI locations and values in the world
 VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
@@ -270,17 +233,17 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			q = 2 ;
 
 		/*
-		double ScalingV = MinMaxDistort(
-				minDistancesToPOI[i][0],
-				minDistancesToPOI[i][1],
-				minDistancesToPOI[i].back());
-		*/
+		   double ScalingV = MinMaxDistort(
+		   minDistancesToPOI[i][0],
+		   minDistancesToPOI[i][1],
+		   minDistancesToPOI[i].back());
+		   */
 		/*
-		double ScalingV = GaussDistort(
-				minDistancesToPOI[i][0],
-				minDistancesToPOI[i][1],
-				minDistancesToPOI[i].back());
-		*/
+		   double ScalingV = GaussDistort(
+		   minDistancesToPOI[i][0],
+		   minDistancesToPOI[i][1],
+		   minDistancesToPOI[i].back());
+		   */
 		double ScalingV = 1;
 
 		s(q) += ScalingV*POIs[i].GetValue()/max(d,1.0) ;
@@ -338,8 +301,8 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		}
 		//double diff = sqrt(pow(jointState[i](0)-currentXY(0),2)+pow(jointState[i](1)-currentXY(1),2)) ;
 		//if (diff < minDiff){
-			//minDiff = diff ;
-			//ind = i ;
+		//minDiff = diff ;
+		//ind = i ;
 		//}
 	}
 
