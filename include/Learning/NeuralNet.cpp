@@ -35,14 +35,18 @@ NeuralNet::NeuralNet(size_t numIn, size_t numOut, size_t numHidden, actFun afTyp
 }
 
 // Evaluate NN output given input vector
-VectorXd NeuralNet::EvaluateNN(VectorXd inputs){
+// ideally input vector does not get changed, but unable to implement const 
+// due since passing into non-const activation function (which cannot be made const due to reassignment)
+VectorXd NeuralNet::EvaluateNN(VectorXd& inputs){
   VectorXd hiddenLayer = (this->*ActivationFunction)(inputs, layerActivation[0]) ;
   VectorXd outputs = (this->*ActivationFunction)(hiddenLayer, layerActivation[1]) ;
   return outputs ;
 }
 
 // Evaluate NN output given input vector
-VectorXd NeuralNet::EvaluateNN(VectorXd inputs, VectorXd & hiddenLayer){
+// ideally input vector does not get changed, but unable to implement const 
+// due since passing into non-const activation function (which cannot be made const due to reassignment)
+VectorXd NeuralNet::EvaluateNN(VectorXd& inputs, VectorXd& hiddenLayer){
   hiddenLayer = (this->*ActivationFunction)(inputs, 0) ;
   VectorXd outputs = (this->*ActivationFunction)(hiddenLayer, 1) ;
   return outputs ;
@@ -77,7 +81,7 @@ double NeuralNet::RandomMutation(double fan_in) {
 }
 
 // Assign weight matrices
-void NeuralNet::SetWeights(MatrixXd A, MatrixXd B){
+void NeuralNet::SetWeights(const MatrixXd& A, const MatrixXd& B){
   weightsA = A ;
   weightsB = B ;
 }
@@ -95,7 +99,7 @@ void NeuralNet::OutputNN(const char * A, const char * B){
   WriteNN(weightsB, NNFileNameB) ;
 }
 
-void NeuralNet::BackPropagation(vector<VectorXd> trainInputs, vector<VectorXd> trainTargets){
+void NeuralNet::BackPropagation(vector<VectorXd>& trainInputs, vector<VectorXd>& trainTargets){
   double sumSquaredError = DBL_MAX ;
   double threshold = 0.001 ;
   
@@ -179,7 +183,7 @@ void NeuralNet::BackPropagation(vector<VectorXd> trainInputs, vector<VectorXd> t
 }
 
 // Write weight matrix values to file
-void NeuralNet::WriteNN(MatrixXd A, std::stringstream &fileName){
+void NeuralNet::WriteNN(const MatrixXd & A, std::stringstream &fileName){
   std::ofstream NNFile ;
   NNFile.open(fileName.str().c_str()) ;
   for (int i = 0; i < A.rows(); i++){
@@ -204,7 +208,9 @@ void NeuralNet::InitialiseWeights(MatrixXd & A){
 }
 
 // Hyperbolic tan activation function
-VectorXd NeuralNet::HyperbolicTangent(VectorXd input, size_t layer){
+// ideally input vector does not get changed, but unable to implement const 
+// due to errors with function reassignment
+VectorXd NeuralNet::HyperbolicTangent(VectorXd & input, size_t layer){
   VectorXd output ;
   if (layer == 0){
     output = input.transpose()*weightsA ;
@@ -233,7 +239,9 @@ VectorXd NeuralNet::HyperbolicTangent(VectorXd input, size_t layer){
 }
 
 // Logistic function activation function
-VectorXd NeuralNet::LogisticFunction(VectorXd input, size_t layer){
+// ideally input vector does not get changed, but unable to implement const 
+// due to errors with function reassignment
+VectorXd NeuralNet::LogisticFunction(VectorXd & input, size_t layer){
   VectorXd output ;
   if (layer == 0){
     output = weightsA*input ;

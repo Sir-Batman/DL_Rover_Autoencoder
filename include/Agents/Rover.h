@@ -38,8 +38,8 @@ class Rover{
 		void InitialiseNewLearningEpoch(vector<Target>, Vector2d, double) ;
 		void ResetStepwiseEval() ;
 
-		Vector2d ExecuteNNControlPolicy(size_t , vector<Vector2d>) ; // executes NN_i from current (x,y,psi), outputs new (x,y)
-		void ComputeStepwiseEval(vector<Vector2d>, double) ;
+		Vector2d ExecuteNNControlPolicy(size_t , vector<Vector2d>&) ; // executes NN_i from current (x,y,psi), outputs new (x,y)
+		void ComputeStepwiseEval(vector<Vector2d>&, double) ;
 		void SetEpochPerformance(double G, size_t i) ;
 		vector<double> GetEpochEvals(){return epochEvals ;}
 

@@ -55,7 +55,7 @@ void Rover::ResetStepwiseEval(){
 	runningAvgR.clear() ;
 }
 
-Vector2d Rover::ExecuteNNControlPolicy(size_t i, vector<Vector2d> jointState){
+Vector2d Rover::ExecuteNNControlPolicy(size_t i, vector<Vector2d>& jointState){
 	// Calculate body frame NN input state
 	VectorXd s ;
 	if (!stateObsUpdate)
@@ -82,7 +82,7 @@ Vector2d Rover::ExecuteNNControlPolicy(size_t i, vector<Vector2d> jointState){
 	return currentXY ;
 }
 
-void Rover::ComputeStepwiseEval(vector<Vector2d> jointState, double G){
+void Rover::ComputeStepwiseEval(vector<Vector2d>& jointState, double G){
 	if (!stateObsUpdate)
 		DifferenceEvaluationFunction(jointState, G) ;
 	else
@@ -350,11 +350,11 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		}
 	}
 
-	std::cout << "\nPOI Angles: ";
-	printVector(POI_Angles, std::cout);
+	// std::cout << "\nPOI Angles: ";
+	// printVector(POI_Angles, std::cout);
 
-	std::cout << "\nROV Angles: ";
-	printVector(ROV_Angles, std::cout);
+	// std::cout << "\nROV Angles: ";
+	// printVector(ROV_Angles, std::cout);
 
 	return s ;
 }
