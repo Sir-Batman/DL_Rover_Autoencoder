@@ -250,35 +250,35 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	}
 
 
-	// Compute POI 360 Laser Scan Data
+	// // Compute POI 360 Laser Scan Data
 
-	// Maximum distance of Laser Scan Data
-	double LASER_DIST_MAX = 500.0;
-	double POI_RADIUS = 1.0;
-	double ROVER_RADIUS = 1.0;
+	// // Maximum distance of Laser Scan Data
+	// double LASER_DIST_MAX = 500.0;
+	// double POI_RADIUS = 1.0;
+	// double ROVER_RADIUS = 1.0;
 
-	// Initialization of POI Laser Scan
-	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
+	// // Initialization of POI Laser Scan
+	// std::vector<double> POI_Laser(360, LASER_DIST_MAX);
 
-	// Placeholder for each POI vector POIv preinitialized above
-	POIv.setZero(2,1) ;
+	// // Placeholder for each POI vector POIv preinitialized above
+	// POIv.setZero(2,1) ;
 
-	for (size_t i = 0; i < POIs.size(); i++){
+	// for (size_t i = 0; i < POIs.size(); i++){
 
-		// Compute relative angle and distance
-		// Taken from Jen Jen's code (hope it's correct)
-		POIv = POIs[i].GetLocation() - currentXY ;
-		Vector2d POIbody = Global2Body*POIv ;
-		Vector2d diff = currentXY - POIbody ;
+	// 	// Compute relative angle and distance
+	// 	// Taken from Jen Jen's code (hope it's correct)
+	// 	POIv = POIs[i].GetLocation() - currentXY ;
+	// 	Vector2d POIbody = Global2Body*POIv ;
+	// 	Vector2d diff = currentXY - POIbody ;
 
-		// distance between the centers of our object and the POI
-		double d = diff.norm() ;
-		// angle between our object and POI
-		double theta = atan2(POIbody(1),POIbody(0)) ;
+	// 	// distance between the centers of our object and the POI
+	// 	double d = diff.norm() ;
+	// 	// angle between our object and POI
+	// 	double theta = atan2(POIbody(1),POIbody(0)) ;
 
-		computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
+	// 	computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
 
-	}
+	// }
 
 
 
@@ -287,7 +287,7 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	// Compute rover observation states
 	// Finds the index of the current agent in the joint state?
 	size_t ind = 0 ; // stores agent's index in the joint state
-	double minDiff = DBL_MAX ;
+	// double minDiff = DBL_MAX ;
 	for (size_t i = 0; i < jointState.size(); i++){
 		if (jointState[i](0) == currentXY(0) && jointState[i](1) == currentXY(1))
 		{
@@ -332,23 +332,23 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	// Compute Rover 360 Laser Data
 
 	// Initialization of ROV Laser Scan
-	std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
+	// std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
 
-	// Placeholder for each Rover vector rovV preinitialized above
-	rovV.setZero(2,1) ;
+	// // Placeholder for each Rover vector rovV preinitialized above
+	// rovV.setZero(2,1) ;
 
-	for (size_t i = 0; i < jointState.size(); i++){
-		if (i != ind){
-			rovV = jointState[i] - currentXY ;
-			Vector2d rovBody = Global2Body*rovV ;
-			Vector2d diff = currentXY - rovBody ;
-			double d = diff.norm() ;
-			double theta = atan2(rovBody(1),rovBody(0)) ;
+	// for (size_t i = 0; i < jointState.size(); i++){
+	// 	if (i != ind){
+	// 		rovV = jointState[i] - currentXY ;
+	// 		Vector2d rovBody = Global2Body*rovV ;
+	// 		Vector2d diff = currentXY - rovBody ;
+	// 		double d = diff.norm() ;
+	// 		double theta = atan2(rovBody(1),rovBody(0)) ;
 
-			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
+	// 		computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
 
-		}
-	}
+	// 	}
+	// }
 
 	// std::cout << "\nPOI Laser Datas: ";
 	// printVector(POI_Laser, std::cout);
@@ -381,8 +381,8 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 
 	// Maximum distance of Laser Scan Data
 	double LASER_DIST_MAX = 500.0;
-	double POI_RADIUS = 1.0;
-	double ROVER_RADIUS = 1.0;
+	// double POI_RADIUS = 1.0;
+	// double ROVER_RADIUS = 1.0;
 
 	// Initialization of POI Laser Scan
 	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
@@ -426,7 +426,7 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 
 			double theta = atan2(rovBody(1),rovBody(0)) ;
 
-			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
+			computeLaserDataSimple(d, theta, ROV_Laser);
 
 		}
 	}
