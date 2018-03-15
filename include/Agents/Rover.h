@@ -32,7 +32,10 @@ class Rover{
 		Rover(size_t n, size_t nPop, string evalFunc) ;
 		~Rover() ;
 
-		void computeLaserData(double distance, double theta, double object_radius, std::vector<double>& laserData);
+		void computeLaserDataSimple(double distance, double theta, std::vector<double>& laserData);
+		void computeLaserDataComplex(double distance, double theta, double object_radius, std::vector<double>& laserData);
+
+		void generateLaserData(vector<Vector2d> jointState, std::ofstream& roverLaserStream, std::ofstream& poiLaserStream);
 
 		void ResetEpochEvals() ;
 		void InitialiseNewLearningEpoch(vector<Target>, Vector2d, double) ;

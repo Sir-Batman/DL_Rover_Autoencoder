@@ -15,3 +15,6 @@ set( LIBS_TO_LINK Utilities Learning Domains Agents)
 
 add_executable(generateMultiRoverExperts generateMultiRoverExperts.cpp)
 target_link_libraries( generateMultiRoverExperts ${LIBS_TO_LINK} )
+
+add_executable(generateLaserData generateLaserData.cpp)
+target_link_libraries( generateLaserData ${LIBS_TO_LINK} )

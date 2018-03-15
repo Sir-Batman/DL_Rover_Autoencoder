@@ -39,6 +39,9 @@ class MultiRover{
 		void OutputBeliefs(char *) ;
 		void OutputAverageStepwise(char *) ;
 
+		void WriteLaserData();
+		void OutputLaserData(std::string poi_laser_fname, std::string rov_laser_fname);
+
 		void ExecutePolicies(char * readFile, char * storeTraj, char * storePOI, char * storeEval, size_t numIn, size_t numOut, size_t numHidden) ; // read in control policies and execute in random world, store trajectory and POI results in second and third inputs, team performance stored in fourth input, fifth-seventh inputs define NN structure
 
 
@@ -73,6 +76,11 @@ class MultiRover{
 		std::ofstream quryFile ;
 		std::ofstream blfFile ;
 		std::ofstream avgStepRFile ;
+
+		// additional ofstream to output laser data
+		bool outputLaser;
+		std::ofstream poi_laser_stream;
+		std::ofstream rov_laser_stream;
 
 		vector< vector<size_t> > RandomiseTeams(size_t) ;
 } ;

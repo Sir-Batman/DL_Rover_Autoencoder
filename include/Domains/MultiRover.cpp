@@ -10,6 +10,7 @@ MultiRover::MultiRover(vector<double> wLims, size_t numSteps, size_t numPop, siz
 	outputQury = false ;
 	outputBlf = false ;
 	gPOIObs = false ; // true if goal POI is observed
+	outputLaser = false;
 }
 
 MultiRover::~MultiRover(){
@@ -17,11 +18,17 @@ MultiRover::~MultiRover(){
 		delete roverTeam[i] ;
 		roverTeam[i] = 0 ;
 	}
-	if (outputEvals)
+	if (outputEvals){
 		evalFile.close() ;
+	}
+
 	if (outputTrajs){
 		trajFile.close() ;
 		POIFile.close() ;
+	}
+	if (outputLaser){
+		poi_laser_stream.close();
+		rov_laser_stream.close();
 	}
 }
 
@@ -423,5 +430,41 @@ void MultiRover::ExecutePolicies(char * expFile, char * novFile, char * storeTra
 	for (size_t i = 0; i < novLoadedNN.size(); i++){
 		delete novLoadedNN[i] ;
 		novLoadedNN[i] = 0 ;
+	}
+}
+
+
+// This function stores the file to write the laser data information
+void MultiRover::OutputLaserData(std::string poi_laser_fname, std::string rov_laser_fname){
+	if (poi_laser_stream.is_open())
+		poi_laser_stream.close();
+	poi_laser_stream.open(poi_laser_fname.c_str(), std::ios::app);
+
+	if (rov_laser_stream.is_open())
+		rov_laser_stream.close();
+	rov_laser_stream.open(rov_laser_fname.c_str(), std::ios::app);
+
+	outputLaser = true;
+}
+
+void MultiRover::WriteLaserData(){
+	if (!outputLaser){
+		std::cerr << "no laser output stream";
+
+	}
+
+	InitialiseEpoch();
+
+	//generate joint states
+	vector<Vector2d> jointState ;
+	for (size_t j = 0; j < nRovers; j++){
+		roverTeam[j]->InitialiseNewLearningEpoch(POIs,initialXYs[j],initialPsis[j]) ;
+		jointState.push_back(initialXYs[j]) ;
+	}
+
+	//Call Rover's generateLaserData function
+	for (size_t j = 0; j < nRovers; j++){ // looping down the rows of 'teams'
+		roverTeam[j]->generateLaserData(jointState, rov_laser_stream, poi_laser_stream);
+
 	}
 }

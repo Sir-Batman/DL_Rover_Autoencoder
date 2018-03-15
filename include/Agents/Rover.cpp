@@ -258,7 +258,7 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	double ROVER_RADIUS = 1.0;
 
 	// Initialization of POI Laser Scan
-	std::vector<double> POI_Angles(360, LASER_DIST_MAX);
+	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
 
 	// Placeholder for each POI vector POIv preinitialized above
 	POIv.setZero(2,1) ;
@@ -276,7 +276,7 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		// angle between our object and POI
 		double theta = atan2(POIbody(1),POIbody(0)) ;
 
-		computeLaserData(d, theta, POI_RADIUS, POI_Angles);
+		computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
 
 	}
 
@@ -332,7 +332,7 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	// Compute Rover 360 Laser Data
 
 	// Initialization of ROV Laser Scan
-	std::vector<double> ROV_Angles(360, LASER_DIST_MAX);
+	std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
 
 	// Placeholder for each Rover vector rovV preinitialized above
 	rovV.setZero(2,1) ;
@@ -345,21 +345,111 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			double d = diff.norm() ;
 			double theta = atan2(rovBody(1),rovBody(0)) ;
 
-			computeLaserData(d, theta, ROVER_RADIUS, ROV_Angles);
+			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
 
 		}
 	}
 
-	std::cout << "\nPOI Angles: ";
-	printVector(POI_Angles, std::cout);
+	// std::cout << "\nPOI Laser Datas: ";
+	// printVector(POI_Laser, std::cout);
 
-	std::cout << "\nROV Angles: ";
-	printVector(ROV_Angles, std::cout);
+	// std::cout << "\nROV Laser Data: ";
+	// printVector(ROV_Laser, std::cout);
 
 	return s ;
 }
 
-void Rover::computeLaserData(double distance, double theta, double object_radius, std::vector<double>& laserData){
+void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverLaserStream, std::ofstream& poiLaserStream){
+	// Finds the index of the current agent in the joint state?
+	size_t ind = 0 ; // stores agent's index in the joint state
+	for (size_t i = 0; i < jointState.size(); i++){
+		if (jointState[i](0) == currentXY(0) && jointState[i](1) == currentXY(1))
+		{
+			ind = i;
+			break;
+		}
+		if (i+1 == jointState.size())
+		{
+			std::cerr << "ERROR [Agent/Rover.cpp] Agent did not find self in joint state." << std::endl;
+			exit(1);
+		}
+	}
+
+	MatrixXd Global2Body = RotationMatrix(-currentPsi) ;
+
+	// Compute POI 360 Laser Scan Data
+
+	// Maximum distance of Laser Scan Data
+	double LASER_DIST_MAX = 500.0;
+	double POI_RADIUS = 1.0;
+	double ROVER_RADIUS = 1.0;
+
+	// Initialization of POI Laser Scan
+	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
+
+	// Initialize POI vector
+	Vector2d POIv ;
+	POIv.setZero(2,1) ;
+
+	for (size_t i = 0; i < POIs.size(); i++){
+
+		// Compute relative angle and distance
+		// Taken from Jen Jen's code (hope it's correct)
+		POIv = POIs[i].GetLocation() - currentXY ;
+		Vector2d POIbody = Global2Body*POIv ;
+		Vector2d diff = currentXY - POIbody ;
+
+		// distance between the centers of our object and the POI
+		double d = diff.norm() ;
+		// angle between our object and POI
+		double theta = atan2(POIbody(1),POIbody(0)) ;
+
+		computeLaserDataSimple(d, theta, POI_Laser);
+	}
+
+	// Compute Rover 360 Laser Data
+
+	// Initialization of ROV Laser Scan
+	std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
+
+	// Initialize ROV vector
+	Vector2d rovV;
+	rovV.setZero(2,1);
+
+	for (size_t i = 0; i < jointState.size(); i++){
+		if (i != ind){
+			rovV = jointState[i] - currentXY ;
+			Vector2d rovBody = Global2Body*rovV ;
+			Vector2d diff = currentXY - rovBody ;
+
+			double d = diff.norm() ;
+
+			double theta = atan2(rovBody(1),rovBody(0)) ;
+
+			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
+
+		}
+	}
+
+	printVector(POI_Laser, poiLaserStream);
+
+	printVector(ROV_Laser,roverLaserStream);
+
+}
+
+void Rover::computeLaserDataSimple(double distance, double theta, std::vector<double>& laserData){
+	// Convert to Degrees and normalize angle to range [0, 360] rather than [-180, 180]
+	int theta_deg = std::round((theta * 180 / PI) + 180);
+
+
+	// If no closer object has been detected, update the laser scan data
+	if (distance < laserData[theta_deg % 360]){
+		laserData[theta_deg % 360] = distance;
+	}
+}
+
+void Rover::computeLaserDataComplex(double distance, double theta, double object_radius, std::vector<double>& laserData){
+
 	// the angle from theta 
 	// from which the object will return laser information (in radians)
 	double angles_covered = object_radius/distance;
