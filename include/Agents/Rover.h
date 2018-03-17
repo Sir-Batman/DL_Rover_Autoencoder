@@ -94,6 +94,7 @@ void printVector(std::vector<T> v, std::ostream& stream){
         stream << ", " << v[i];
     }
     stream << "\n";
+    stream << std::flush;
 
 }
 

@@ -380,7 +380,8 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 	// Compute POI 360 Laser Scan Data
 
 	// Maximum distance of Laser Scan Data
-	double LASER_DIST_MAX = 500.0;
+	// sqrt(30^2 + 30^2) = 42.426 (rounded to 43)
+	double LASER_DIST_MAX = 43.0;
 	// double POI_RADIUS = 1.0;
 	// double ROVER_RADIUS = 1.0;
 
