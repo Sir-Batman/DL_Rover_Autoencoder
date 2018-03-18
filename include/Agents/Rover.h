@@ -55,7 +55,7 @@ class Rover{
 		bool IsStateObsUpdated(){return stateObsUpdate ;}
 
 		double GetAverageR() ;
-	private:
+	protected:
 		size_t nSteps ;
 		size_t popSize ;
 		size_t numIn ;
