@@ -42,27 +42,31 @@ class autoencoder(nn.Module):
     def __init__(self):
         super(autoencoder, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv1d(2, 16, 3, stride=3, padding=2),  # b, 16, 10, 10
+
+            nn.Conv1d(2, 16, 4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.MaxPool1d(2, stride=2),  # b, 16, 5, 5
-            # nn.Conv1d(16, 8, 3, stride=2, padding=1),  # b, 8, 3, 3
-            # nn.ReLU(True),
-            # nn.MaxPool1d(2, stride=1)  # b, 8, 2, 2
+            nn.MaxPool1d(3, stride=3), 
+
+            nn.Conv1d(16, 1, 4, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.MaxPool1d(3, stride=3)
         )
+
         self.decoder = nn.Sequential(
-            # nn.ConvTranspose1d(8, 16, 3, stride=2),  # b, 16, 5, 5
-            # nn.ReLU(True),
-            nn.ConvTranspose1d(16, 8, 5, stride=3, padding=2),  # b, 8, 15, 15
+            nn.ConvTranspose1d(1, 16, 6, stride=6), 
             nn.ReLU(True),
-            nn.ConvTranspose1d(8, 2, 3, stride=2, padding=2),  # b, 1, 28, 28
+            nn.ConvTranspose2d(16, 2, 6, stride=6, padding=0), 
+            nn.ReLU(True),
+            # nn.ConvTranspose2d(8, 2, 2, stride=2, padding=1), 
             nn.Tanh()
         )
 
     def forward(self, x):
-    	pdb.set_trace()
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
+        x1 = self.encoder(x)
+        pdb.set_trace()
+        x2 = self.decoder(x1)
+        
+        return x1
 
 
 num_epochs = 100
