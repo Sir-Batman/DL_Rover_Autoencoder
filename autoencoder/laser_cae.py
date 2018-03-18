@@ -77,51 +77,88 @@ class autoencoder(nn.Module):
     def decode(self, x):
         return self.decoder(x)
 
-num_epochs = 500
-batch_size = 128
-learning_rate = 1e-2
+def train():
+    num_epochs = 500
+    batch_size = 128
+    learning_rate = 1e-2
 
 
-dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/10/", transform=None)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-model = autoencoder().cuda()
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
-                             weight_decay=1e-5)
-model.train()
-for epoch in range(num_epochs):
+    dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/10/", transform=None)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    model = autoencoder().cuda()
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
+                                 weight_decay=1e-5)
+    model.train()
+    for epoch in range(num_epochs):
+        for data in dataloader:
+            laser_data = data
+            laser_data = Variable(laser_data).cuda()
+            # ===================forward=====================
+            output = model(laser_data)
+            loss = criterion(output, laser_data)
+            # ===================backward====================
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        # ===================log========================
+        print('epoch [{}/{}], loss:{:.4f}'
+              .format(epoch+1, num_epochs, loss.data[0]))
+        # if epoch % 10 == 0:
+        #     pic = to_img(output.cpu().data)
+        #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
+
+    # Verify what the encoded and decoded versions look like
+    # pdb.set_trace()
+    # model.eval()
+    # for data in dataloader:
+    #     laser_data = data
+    #     laser_data = Variable(laser_data).cuda()
+    #     encoded = model.encode(laser_data)
+    #     decoded = model.decode(encoded)
+
+    #     # x1, x2 = model(laser_data)
+    #     pdb.set_trace()
+
+    torch.save(model.state_dict(), './conv_autoencoder.pth')
+
+def encode_data():
+    num_epochs = 50
+    batch_size = 128
+    learning_rate = 1e-2
+
+
+    dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/0/", transform=None)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    model = autoencoder().cuda()
+
+
+    print('Loading model parameters...')
+    pretrained_dict = torch.load(os.path.join("./conv_autoencoder.pth"))
+    model_dict = model.state_dict()
+    for key, value in pretrained_dict.iteritems():
+        model_dict[key] = value
+    model.load_state_dict(model_dict)
+
+    # Here is some example code on how you would want to input the data
+    # and run only the forward pass
     for data in dataloader:
         laser_data = data
         laser_data = Variable(laser_data).cuda()
-        # ===================forward=====================
-        output = model(laser_data)
-        loss = criterion(output, laser_data)
-        # ===================backward====================
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    # ===================log========================
-    print('epoch [{}/{}], loss:{:.4f}'
-          .format(epoch+1, num_epochs, loss.data[0]))
-    # if epoch % 10 == 0:
-    #     pic = to_img(output.cpu().data)
-    #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
+        encoded = model.encode(laser_data)
+        decoded = model.decode(encoded)
 
-# Verify what the encoded and decoded versions look like
-# pdb.set_trace()
-# model.eval()
-# for data in dataloader:
-#     laser_data = data
-#     laser_data = Variable(laser_data).cuda()
-#     encoded = model.encode(laser_data)
-#     decoded = model.decode(encoded)
 
-#     # x1, x2 = model(laser_data)
-#     pdb.set_trace()
+    # torch.save(model.state_dict(), './conv_autoencoder_.pth')
 
-torch.save(model.state_dict(), './conv_autoencoder.pth')
+def main():
+    # Run train() to create the autoencoder
+    # train()
+
+    # Run encode_data() to use a prexisting autoencoder
+    encode_data()
 
 
 
-# if __name__ == '__main__':
-# 	main()
+if __name__ == '__main__':
+	main()
