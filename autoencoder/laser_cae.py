@@ -15,7 +15,7 @@ import pdb
 
 class LaserDataset(TensorDataset):
 
-    def __init__(self, folder_dataset="../build/Results/Multirover_experts/0/", transform=None):
+    def __init__(self, folder_dataset="../build/Results/Multirover_experts/10/", transform=None):
         self.transform = transform
         # Open and load text file including the whole training data
         self.poi_laser = np.genfromtxt(folder_dataset+'poi_laser.csv', delimiter=",", dtype=np.float32)/43.0
@@ -77,13 +77,13 @@ class autoencoder(nn.Module):
     def decode(self, x):
         return self.decoder(x)
 
-num_epochs = 100
+num_epochs = 500
 batch_size = 128
 learning_rate = 1e-2
 
 
-dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/0/", transform=None)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/10/", transform=None)
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 model = autoencoder().cuda()
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
