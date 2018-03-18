@@ -32,7 +32,7 @@ int main(){
 
 	std::cout << "Generating expert policies for rover domain using " << evalFunc << " fitness.\n" ;
 
-	int staticOrRandom = 1 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
+	int staticOrRandom = 0 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
 
 	std::cout << "This program will evolve a " << rovs << "-rover team over " << nEps << " learning epochs, each of " << nSteps << " timesteps.\n" ;
 	std::cout << "Rover NN control policy parameters:\n" ;
@@ -120,6 +120,7 @@ int main(){
 
 		trainDomain.ResetEpochEvals() ;
 		trainDomain.SimulateEpoch() ;
+		std::cout << std::flush;
 	}
 
 	char NNFile[buffSize] ;
