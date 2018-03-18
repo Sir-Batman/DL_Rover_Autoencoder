@@ -55,7 +55,7 @@ class autoencoder(nn.Module):
         self.decoder = nn.Sequential(
             nn.ConvTranspose1d(1, 16, 6, stride=6), 
             nn.ReLU(True),
-            nn.ConvTranspose2d(16, 2, 6, stride=6, padding=0), 
+            nn.ConvTranspose1d(16, 2, 6, stride=6, padding=0), 
             nn.ReLU(True),
             # nn.ConvTranspose2d(8, 2, 2, stride=2, padding=1), 
             nn.Tanh()
@@ -63,10 +63,9 @@ class autoencoder(nn.Module):
 
     def forward(self, x):
         x1 = self.encoder(x)
-        pdb.set_trace()
         x2 = self.decoder(x1)
         
-        return x1
+        return x2
 
 
 num_epochs = 100
