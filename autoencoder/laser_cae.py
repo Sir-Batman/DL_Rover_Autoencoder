@@ -13,6 +13,8 @@ import pdb
 # FOLDER_DATASET = "./Track_1_Wheel_Test/"
 # plt.ion()
 
+model_file = './conv_autoencoder.pth'
+
 class LaserDataset(TensorDataset):
 
     def __init__(self, folder_dataset="../build/Results/Multirover_experts/10/", transform=None):
@@ -38,9 +40,9 @@ class LaserDataset(TensorDataset):
         return len(self.poi_laser)
 
 
-class autoencoder(nn.Module):
+class AutoEncoder(nn.Module):
     def __init__(self):
-        super(autoencoder, self).__init__()
+        super(AutoEncoder, self).__init__()
         self.encoder = nn.Sequential(
 
             nn.Conv1d(2, 16, 4, stride=2, padding=1),
@@ -60,7 +62,7 @@ class autoencoder(nn.Module):
             nn.ConvTranspose1d(16, 2, 6, stride=6, padding=0), 
             nn.ReLU(True),
             # nn.ConvTranspose2d(8, 2, 2, stride=2, padding=1), 
-            nn.Tanh()
+            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -84,8 +86,9 @@ def train():
 
 
     dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/10/", transform=None)
+    print("dataset of size: {}\n".format(len(dataset)))
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    model = autoencoder().cuda()
+    model = AutoEncoder().cuda()
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
@@ -120,7 +123,8 @@ def train():
     #     # x1, x2 = model(laser_data)
     #     pdb.set_trace()
 
-    torch.save(model.state_dict(), './conv_autoencoder.pth')
+    torch.save(model.state_dict(), model_file)
+    print('saving model to file {}'.format(model_file))
 
 def encode_data():
     num_epochs = 50
@@ -130,7 +134,7 @@ def encode_data():
 
     dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/0/", transform=None)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    model = autoencoder().cuda()
+    model = AutoEncoder().cuda()
 
 
     print('Loading model parameters...')
@@ -153,10 +157,10 @@ def encode_data():
 
 def main():
     # Run train() to create the autoencoder
-    # train()
+    train()
 
     # Run encode_data() to use a prexisting autoencoder
-    encode_data()
+    # encode_data()
 
 
 
