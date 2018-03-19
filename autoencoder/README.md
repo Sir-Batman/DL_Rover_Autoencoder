@@ -21,9 +21,9 @@ Data Files
 
 `sample_rov_laser.csv` - Contains 10 ROV laser scans used to sanity check the model (samples not used to train model)
 
-`train_poi_laser.csv` - Contains 10 POI laser scans used to sanity check the model (samples from 100,000 used to train model)
+`train_poi_laser.csv` - Contains 2 POI laser scans used to sanity check the model (samples from 100,000 used to train model)
 
-`train_rov_laser.csv` - Contains 10 ROV laser scans used to sanity check the model (samples from 100,000 used to train model)
+`train_rov_laser.csv` - Contains 2 ROV laser scans used to sanity check the model (samples from 100,000 used to train model)
 
 `test.log` - example of input, encode, decode of first laser scan in the sample csv files.
 
@@ -35,6 +35,8 @@ Spreadsheet
 
 Current Status
 ----
-It seems that the autoencoder's performance does not work very well when given 100,000 damples to train on. Looking at `test.log` and `train.log`, the decoded laser scan does not seem very accurate. More development of the network is necessary, but this may be enough for the presentation.
+It seems that the autoencoder's performance does not work very well when given 100,000 samples to train on. This can be seen in `cae_training.log`, which shows that the loss while the autoencoder is trained does not decrease. Additionally, looking at `test.log` and `train.log`, the decoded laser scan does not seem very accurate. 
 
-For connecting this autoencoder to the pipeline, I suggest looking at encode_laser.py. 
+More development of the network is necessary.
+
+For connecting this autoencoder to the pipeline, I suggest looking at `encode_laser.py`. 
