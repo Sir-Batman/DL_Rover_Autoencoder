@@ -3,10 +3,6 @@ AutoEncoder
 
 Scripts
 ----
-`mnist_cae.py` - Initial sample autoencoder for MNIST that we adapted to work with laser data.
-
-`laser_ae.py` - Linear Autoencoder for laser data. Does not seem (?) work but retained for posterity.
-
 `train_cae.py` - Trains the Convolutional Autoencoder. Select which encoder to use with the `model_file` parameter
 
 `encode_laser.py` - A sample file showing how to load the autoencoder and call it on different laser scan data.
@@ -29,13 +25,13 @@ It also contains some log files for how the encoder was trained.
 Samples
 ----
 
-`sample_poi_laser.csv` - Contains 10 POI laser scans used to sanity check the model (samples not used to train model)
+`samples/sample_poi_laser.csv` - Contains 10 POI laser scans used to sanity check the model (samples not used to train model)
 
-`sample_rov_laser.csv` - Contains 10 ROV laser scans used to sanity check the model (samples not used to train model)
+`samples/sample_rov_laser.csv` - Contains 10 ROV laser scans used to sanity check the model (samples not used to train model)
 
-`train_poi_laser.csv` - Contains 2 POI laser scans used to sanity check the model (samples from 100,000 used to train model)
+`samples/train_poi_laser.csv` - Contains 2 POI laser scans used to sanity check the model (samples from 100,000 used to train model)
 
-`train_rov_laser.csv` - Contains 2 ROV laser scans used to sanity check the model (samples from 100,000 used to train model)
+`samples/train_rov_laser.csv` - Contains 2 ROV laser scans used to sanity check the model (samples from 100,000 used to train model)
 
 
 Spreadsheet
