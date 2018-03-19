@@ -13,11 +13,13 @@ import pdb
 # FOLDER_DATASET = "./Track_1_Wheel_Test/"
 # plt.ion()
 
-model_file = './conv_autoencoder.pth'
+model_file = './conv_autoencoder_3layer.pth'
+dataset_folder = "../build/Results/Multirover_experts/10/"
+testset_folder = "../build/Results/Multirover_experts/0/"
 
 class LaserDataset(TensorDataset):
 
-    def __init__(self, folder_dataset="../build/Results/Multirover_experts/10/", transform=None):
+    def __init__(self, folder_dataset=dataset_folder, transform=None):
         self.transform = transform
         # Open and load text file including the whole training data
         self.poi_laser = np.genfromtxt(folder_dataset+'poi_laser.csv', delimiter=",", dtype=np.float32)/43.0
@@ -45,33 +47,37 @@ class AutoEncoder(nn.Module):
         super(AutoEncoder, self).__init__()
         self.encoder = nn.Sequential(
 
-            nn.Conv1d(2, 16, 4, stride=2, padding=1),
-            nn.BatchNorm2d(16),
+            nn.Conv1d(2, 32, 5, stride=1, padding=2),
+            nn.BatchNorm2d(32),
             nn.ReLU(True),
             nn.MaxPool1d(3, stride=3), 
 
-            nn.Conv1d(16, 1, 4, stride=2, padding=1),
+            nn.Conv1d(32, 16, 5, stride=1, padding=2),
+            nn.BatchNorm2d(16),
+            nn.ReLU(True),
+            nn.MaxPool1d(3, stride=3),          
+
+            nn.Conv1d(16, 1, 5, stride=1, padding=2),
             # nn.BatchNorm2d(1),
             nn.ReLU(True),
-            nn.MaxPool1d(3, stride=3)
+            nn.MaxPool1d(5, stride=5)
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(1, 16, 6, stride=6), 
+            nn.ConvTranspose1d(1, 16, 12, stride=4, padding=0), 
             nn.ReLU(True),
-            nn.ConvTranspose1d(16, 2, 6, stride=6, padding=0), 
+            nn.ConvTranspose1d(16, 32, 3, stride=3, padding=0), 
             nn.ReLU(True),
-            # nn.ConvTranspose2d(8, 2, 2, stride=2, padding=1), 
+            nn.ConvTranspose1d(32, 2, 3, stride=3, padding=0), 
             nn.Sigmoid()
         )
 
     def forward(self, x):
         x1 = self.encoder(x)
         x2 = self.decoder(x1)
-        if self.training:
-            return x2
-        else:
-            return x1, x2
+
+        return x2
+
 
     def encode(self, x):
         return self.encoder(x)
@@ -80,20 +86,28 @@ class AutoEncoder(nn.Module):
         return self.decoder(x)
 
 def train():
-    num_epochs = 500
-    batch_size = 128
-    learning_rate = 1e-2
+    num_epochs = 1000
+    batch_size = 256
+    learning_rate = 1e-3
 
 
-    dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/10/", transform=None)
+    dataset = LaserDataset(folder_dataset=dataset_folder, transform=None)    
     print("dataset of size: {}\n".format(len(dataset)))
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    testset = LaserDataset(folder_dataset=testset_folder, transform=None)    
+    print("testset of size: {}\n".format(len(testset)))
+    testloader = DataLoader(testset, batch_size=len(testset), shuffle=True)
+
     model = AutoEncoder().cuda()
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
-    model.train()
+    
     for epoch in range(num_epochs):
+
+        model.train()
+
         for data in dataloader:
             laser_data = data
             laser_data = Variable(laser_data).cuda()
@@ -105,11 +119,21 @@ def train():
             loss.backward()
             optimizer.step()
         # ===================log========================
-        print('epoch [{}/{}], loss:{:.4f}'
+        print('epoch [{}/{}], train loss:{:.4f}'
               .format(epoch+1, num_epochs, loss.data[0]))
-        # if epoch % 10 == 0:
-        #     pic = to_img(output.cpu().data)
-        #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
+
+        model.eval()
+
+        for test in testloader:
+            laser_data = test
+            laser_data = Variable(laser_data).cuda()
+            # ===================forward=====================
+            output = model(laser_data)
+            loss = criterion(output, laser_data)
+
+        # ===================log========================
+        print('epoch [{}/{}], test loss:{:.4f}'
+              .format(epoch+1, num_epochs, loss.data[0]))
 
     # Verify what the encoded and decoded versions look like
     # pdb.set_trace()
@@ -127,10 +151,7 @@ def train():
     print('saving model to file {}'.format(model_file))
 
 def encode_data():
-    num_epochs = 50
     batch_size = 128
-    learning_rate = 1e-2
-
 
     dataset = LaserDataset(folder_dataset="../build/Results/Multirover_experts/0/", transform=None)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)

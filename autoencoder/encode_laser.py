@@ -7,15 +7,27 @@ from torch.utils.data.dataset import Dataset, TensorDataset
 from torch.utils.data import DataLoader
 import numpy as np
 import os
-
 import pdb
+from pydoc import locate
+from LaserDataset import LaserDataset
 
-from laser_cae import AutoEncoder, LaserDataset
+# The model number 
+model_folder = 'model0'
 
-autoencoder_param_file = "./conv_autoencoder.pth"
+model_file = 'models.'+ model_folder +'.laser_cae.AutoEncoder'
+
+AutoEncoder = locate(model_file)
+if AutoEncoder==None:
+    raise TypeError, "Failed to find AutoEncoder"
+
+autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder.pth'
+
+
 
 
 def loadModel():
+    print("Training Model from {}".format(model_file))
+    print("Using Model parameters from {}".format(autoencoder_param_file))
     # create model
     model = AutoEncoder().cuda()
 
@@ -34,8 +46,8 @@ def main():
     model = loadModel()
 
     # sample data
-    poi_laser = np.genfromtxt('train_poi_laser.csv', delimiter=",", dtype=np.float32)/43.0
-    rov_laser = np.genfromtxt('train_rov_laser.csv', delimiter=",", dtype=np.float32)/43.0
+    poi_laser = np.genfromtxt(os.path.join('samples', 'train_poi_laser.csv'), delimiter=",", dtype=np.float32)/43.0
+    rov_laser = np.genfromtxt(os.path.join('samples', 'train_rov_laser.csv'), delimiter=",", dtype=np.float32)/43.0
 
     # assume data holds your 2x360 NORMALIZED data with POI as first row, and ROV as second row
     # Note: numpy array need to have elements of dtype=np.float32

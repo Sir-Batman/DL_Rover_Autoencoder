@@ -5,17 +5,29 @@ Scripts
 ----
 `mnist_cae.py` - Initial sample autoencoder for MNIST that we adapted to work with laser data.
 
-`laser_cae.py` - Convolutional Autoencoder used to encode laser data
-
 `laser_ae.py` - Linear Autoencoder for laser data. Does not seem (?) work but retained for posterity.
+
+`train_cae.py` - Trains the Convolutional Autoencoder. Select which encoder to use with the `model_file` parameter
 
 `encode_laser.py` - A sample file showing how to load the autoencoder and call it on different laser scan data.
 
-Data Files
-----
-`conv_autoencoder.pth` - Contains the trained model on 100,000 laser scans.
+`LaserDataset.py` - LaserDataset class used to load laser data
 
-`cae_training.log` - The log of the loss as the model was trained.
+
+Models
+----
+The `models` folder contains various iterations of our autoencoder. Read the README for each one to get a sense of what they are.
+
+Each model in the model folder contains the Autoencoder Class in `laser_cae.py` and the model parameters in `conv_autoencoder.pth`.
+
+It also contains some log files for how the encoder was trained.
+
+`model0` - Our initial autoencoder that encodes to 10 vector. Still poor decode performance.
+
+`model1` - First iteration. Now encodes to 8 vector. Still poor decode performance.
+
+Samples
+----
 
 `sample_poi_laser.csv` - Contains 10 POI laser scans used to sanity check the model (samples not used to train model)
 
@@ -25,13 +37,11 @@ Data Files
 
 `train_rov_laser.csv` - Contains 2 ROV laser scans used to sanity check the model (samples from 100,000 used to train model)
 
-`test.log` - example of input, encode, decode of first laser scan in the sample csv files.
-
-`train.log` - example of input, encode, decode of first laser scan in the train csv files.
 
 Spreadsheet
 ----
 `layer_size_calc.ods` - spreadsheet that computes the output size of each layer given parameters.
+
 
 Current Status
 ----
