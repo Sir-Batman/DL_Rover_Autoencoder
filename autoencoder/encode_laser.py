@@ -11,18 +11,17 @@ import pdb
 from pydoc import locate
 from LaserDataset import LaserDataset
 
-# The model number 
-model_folder = 'model0'
+# The model folder (ex. `model0`)
+model_folder = 'model1'
 
+# construct the submodule path to the autoencoder
 model_file = 'models.'+ model_folder +'.laser_cae.AutoEncoder'
-
 AutoEncoder = locate(model_file)
 if AutoEncoder==None:
     raise TypeError, "Failed to find AutoEncoder"
 
+# construct path to autoencoder parameters
 autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder.pth'
-
-
 
 
 def loadModel():
