@@ -18,6 +18,8 @@ Logs
 
 Comments
 ---
+This is our initial model.
 
 In this autoencoder, we encode 2 channels of 360 laser data to a 10 vector using 2 convolutional layers.
-This is our initial model. It does not seem to work very well, as the decoded images don't seem to match the original.
+
+It does not seem to work very well, as the decoded images don't seem to match the original.
