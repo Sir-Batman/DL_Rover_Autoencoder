@@ -18,7 +18,7 @@ int main(){
 
 	size_t rovs = 10 ;        // Number of rovers
 	size_t nPOIs = 20 ;       // Number of POIs
-	int coupling = 2 ;        // Number of simultaneous observations required
+	int coupling = 0 ;        // Number of simultaneous observations required
 
 	size_t nSteps = 30 ;      // Number of timesteps in each learning epoch
 	size_t nEps = 1000 ;      // Number of learning epochs
@@ -32,7 +32,7 @@ int main(){
 
 	std::cout << "Generating expert policies for rover domain using " << evalFunc << " fitness.\n" ;
 
-	int staticOrRandom = 1 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
+	int staticOrRandom = 0 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
 
 	std::cout << "This program will evolve a " << rovs << "-rover team over " << nEps << " learning epochs, each of " << nSteps << " timesteps.\n" ;
 	std::cout << "Rover NN control policy parameters:\n" ;

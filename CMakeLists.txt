@@ -8,7 +8,7 @@ project(multirover)
 #include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories(include)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -I ~/include/eigen3/ nlohmann communications")
+set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -I ~/eigen3/")
 add_subdirectory(include)
 
 set( LIBS_TO_LINK Utilities Learning Domains Agents)

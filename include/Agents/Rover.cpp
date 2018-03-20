@@ -192,122 +192,49 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 
 	std::vector< std::vector<double> > minDistancesToPOI;
 
-	// Find the minimum distances to a POI
-	//For each POI
-	for (size_t i = 0; i < POIs.size(); i++)
-	{
-		minDistancesToPOI.resize(POIs.size());
-		for (size_t j = 0; j < jointState.size(); j++)
-		{
-			Vector2d P2Av = POIs[i].GetLocation() - jointState[j];
-			double dist = P2Av.norm();
-			minDistancesToPOI[i].push_back(dist);
-		}
-		std::sort(minDistancesToPOI[i].begin(), minDistancesToPOI[i].end());
-		double myDist = 0;
-		Vector2d POIvec = POIs[i].GetLocation() - currentXY ;
-		Vector2d POIbody = Global2Body*POIvec ;
-		Vector2d diff = currentXY - POIbody ;
-		myDist = diff.norm() ;
-		// Hackily store "my" distance to POI i on the back of minDistancesToPOI[i]
-		minDistancesToPOI[i].push_back(myDist);
-	}
+	// Compute POI 360 Laser Scan Data
 
-	// Compute POI observation states
+	// Maximum distance of Laser Scan Data
+	double LASER_DIST_MAX = 43.0;
+	double POI_RADIUS = 1.0;
+	double ROVER_RADIUS = 1.0;
 	Vector2d POIv ;
+
+	// Initialization of POI Laser Scan
+	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
+
+	// Placeholder for each POI vector POIv preinitialized above
 	POIv.setZero(2,1) ;
+
 	for (size_t i = 0; i < POIs.size(); i++){
+
+		// Compute relative angle and distance
+		// Taken from Jen Jen's code (hope it's correct)
 		POIv = POIs[i].GetLocation() - currentXY ;
 		Vector2d POIbody = Global2Body*POIv ;
 		Vector2d diff = currentXY - POIbody ;
+
+		// distance between the centers of our object and the POI
 		double d = diff.norm() ;
+		// angle between our object and POI
 		double theta = atan2(POIbody(1),POIbody(0)) ;
-		size_t q ;
-		if (theta >= PI/2.0)
-			q = 3 ;
-		else if (theta >= 0.0)
-			q = 0 ;
-		else if (theta >= -PI/2.0)
-			q = 1 ;
-		else
-			q = 2 ;
 
-		/*
-		   double ScalingV = MinMaxDistort(
-		   minDistancesToPOI[i][0],
-		   minDistancesToPOI[i][1],
-		   minDistancesToPOI[i].back());
-		   */
-		/*
-		   double ScalingV = GaussDistort(
-		   minDistancesToPOI[i][0],
-		   minDistancesToPOI[i][1],
-		   minDistancesToPOI[i].back());
-		   */
-		double ScalingV = 1;
+		computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
 
-		s(q) += ScalingV*POIs[i].GetValue()/max(d,1.0) ;
 	}
 
 
-	// // Compute POI 360 Laser Scan Data
 
-	// // Maximum distance of Laser Scan Data
-	// double LASER_DIST_MAX = 500.0;
-	// double POI_RADIUS = 1.0;
-	// double ROVER_RADIUS = 1.0;
+	// Compute Rover 360 Laser Data
 
-	// // Initialization of POI Laser Scan
-	// std::vector<double> POI_Laser(360, LASER_DIST_MAX);
+	// Initialization of ROV Laser Scan
+	std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
 
-	// // Placeholder for each POI vector POIv preinitialized above
-	// POIv.setZero(2,1) ;
-
-	// for (size_t i = 0; i < POIs.size(); i++){
-
-	// 	// Compute relative angle and distance
-	// 	// Taken from Jen Jen's code (hope it's correct)
-	// 	POIv = POIs[i].GetLocation() - currentXY ;
-	// 	Vector2d POIbody = Global2Body*POIv ;
-	// 	Vector2d diff = currentXY - POIbody ;
-
-	// 	// distance between the centers of our object and the POI
-	// 	double d = diff.norm() ;
-	// 	// angle between our object and POI
-	// 	double theta = atan2(POIbody(1),POIbody(0)) ;
-
-	// 	computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
-
-	// }
-
-
-
-	//std::cout << "State: [" << s[0] << "," << s[1] << "," << s[2] << "," << s[3] << "]\n" ;
-
-	// Compute rover observation states
-	// Finds the index of the current agent in the joint state?
-	size_t ind = 0 ; // stores agent's index in the joint state
-	// double minDiff = DBL_MAX ;
-	for (size_t i = 0; i < jointState.size(); i++){
-		if (jointState[i](0) == currentXY(0) && jointState[i](1) == currentXY(1))
-		{
-			ind = i;
-			break;
-		}
-		if (i+1 == jointState.size())
-		{
-			std::cerr << "ERROR [Agent/Rover.cpp] Agent did not find self in joint state." << std::endl;
-			exit(1);
-		}
-		//double diff = sqrt(pow(jointState[i](0)-currentXY(0),2)+pow(jointState[i](1)-currentXY(1),2)) ;
-		//if (diff < minDiff){
-		//minDiff = diff ;
-		//ind = i ;
-		//}
-	}
-
+	// Placeholder for each Rover vector rovV preinitialized above
 	Vector2d rovV ;
 	rovV.setZero(2,1) ;
+
+	size_t ind = 0 ; // stores agent's index in the joint state
 	for (size_t i = 0; i < jointState.size(); i++){
 		if (i != ind){
 			rovV = jointState[i] - currentXY ;
@@ -315,46 +242,29 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 			Vector2d diff = currentXY - rovBody ;
 			double d = diff.norm() ;
 			double theta = atan2(rovBody(1),rovBody(0)) ;
-			size_t q ;
-			if (theta >= PI/2.0)
-				q = 7 ;
-			else if (theta >= 0.0)
-				q = 4 ;
-			else if (theta >= -PI/2.0)
-				q = 5 ;
-			else
-				q = 6 ;
-			s(q) += 1.0/max(d,1.0) ;
+
+			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
+
 		}
 	}
-	
 
-	// Compute Rover 360 Laser Data
+	std::cout << "\nPOI Laser Datas: ";
+	//printVector(POI_Laser, std::cout);
 
-	// Initialization of ROV Laser Scan
-	// std::vector<double> ROV_Laser(360, LASER_DIST_MAX);
+	std::cout << "\nROV Laser Data: ";
+	//printVector(ROV_Laser, std::cout);
+    //std::cout << strVector(POI_Laser) << std::endl;
+    //std::cout << strVector(ROV_Laser) << std::endl;
 
-	// // Placeholder for each Rover vector rovV preinitialized above
-	// rovV.setZero(2,1) ;
+    // Send
+    send(strVector(POI_Laser), "./topy");
+    send(strVector(ROV_Laser), "./topy");
+    
+    // Receive
+    std::string response = recieve("./tocpp");
+    std::cout << "Response: " << response << std::endl;
+    // TODO individually parse each floating point response, and add to the state vector.
 
-	// for (size_t i = 0; i < jointState.size(); i++){
-	// 	if (i != ind){
-	// 		rovV = jointState[i] - currentXY ;
-	// 		Vector2d rovBody = Global2Body*rovV ;
-	// 		Vector2d diff = currentXY - rovBody ;
-	// 		double d = diff.norm() ;
-	// 		double theta = atan2(rovBody(1),rovBody(0)) ;
-
-	// 		computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
-
-	// 	}
-	// }
-
-	// std::cout << "\nPOI Laser Datas: ";
-	// printVector(POI_Laser, std::cout);
-
-	// std::cout << "\nROV Laser Data: ";
-	// printVector(ROV_Laser, std::cout);
 
 	return s ;
 }

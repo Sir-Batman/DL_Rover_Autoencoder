@@ -98,4 +98,41 @@ void printVector(std::vector<T> v, std::ostream& stream){
 
 }
 
+template <class T>
+std::string strVector(const std::vector<T> &v)
+{
+    std::string s;
+    s += "[";
+    for (int i = 0; i < v.size()-1; ++i)
+    {
+        s.append(std::to_string(v[i]));
+        s += ",";
+    }
+    s.append(std::to_string(v[v.size()-1]));
+    s+="]";
+    return s;
+}
+
+void send(const std::string & message, const std::string & filename)
+{
+	std::ofstream topy(filename);
+	topy << message;
+	topy.close();
+}
+
+std::string recieve(const std::string &filename)
+{
+	std::string message;
+	std::cout << "Opening file... " << std::endl;
+	std::ifstream tocpp(filename);
+	std::cout << "Opened!" << std::endl;
+	tocpp >> message;
+	std::cout << "Finished writing" << std::endl;
+	tocpp.close();
+	std::cout << " and closed" << std::endl;
+	return message;
+}
+
+
+
 #endif // ROVER_H_
