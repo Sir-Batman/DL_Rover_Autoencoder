@@ -18,7 +18,7 @@ int main(){
 
 	size_t rovs = 10 ;        // Number of rovers
 	size_t nPOIs = 20 ;       // Number of POIs
-	int coupling = 2 ;        // Number of simultaneous observations required
+	int coupling = 1 ;        // Number of simultaneous observations required
 
 	size_t nSteps = 30 ;      // Number of timesteps in each learning epoch
 	size_t nEps = 1000 ;      // Number of learning epochs
