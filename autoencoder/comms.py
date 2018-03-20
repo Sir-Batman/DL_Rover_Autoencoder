@@ -3,10 +3,11 @@ import json
 import time
 
 def send(message, filename="tocpp"):
-    print "in send"
+    #print "in send"
     with open(filename, 'w') as tocpp:
-        print "file opened"
+        #print "file opened"
         tocpp.write(message)
+        tocpp.flush()
 
 def recieve(filename="topy"):
     with open(filename, 'r') as topy:
@@ -16,11 +17,10 @@ def recieve(filename="topy"):
 if __name__ == '__main__':
     # Emulate the autoencoder interaction
     # Read, think, write
-    print "getting message"
+    #print "getting messages"
     message = recieve()
-    print "recieved ", message
-    print "sleeping..."
-    time.sleep(1)
+    message = recieve()
+    #print "recieved ", message
     send(message)
-    print "Message sent"
+    #print "Message sent"
 

@@ -1,6 +1,8 @@
 #ifndef ROVER_H_
 #define ROVER_H_
 
+#include <stdlib.h>
+#include <sstream>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -116,6 +118,7 @@ std::string strVector(const std::vector<T> &v)
 void send(const std::string & message, const std::string & filename)
 {
 	std::ofstream topy(filename);
+    //std::cout << "Sending: " << message << std::endl;
 	topy << message;
 	topy.close();
 }
@@ -123,13 +126,13 @@ void send(const std::string & message, const std::string & filename)
 std::string recieve(const std::string &filename)
 {
 	std::string message;
-	std::cout << "Opening file... " << std::endl;
+	//std::cout << "Opening file... " << std::endl;
 	std::ifstream tocpp(filename);
-	std::cout << "Opened!" << std::endl;
+	//std::cout << "Opened!" << std::endl;
 	tocpp >> message;
-	std::cout << "Finished writing" << std::endl;
+	//std::cout << "Finished writing" << std::endl;
 	tocpp.close();
-	std::cout << " and closed" << std::endl;
+	//std::cout << " and closed" << std::endl;
 	return message;
 }
 

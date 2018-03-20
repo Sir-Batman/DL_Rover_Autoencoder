@@ -184,6 +184,8 @@ double GaussDistort(double d1, double d2, double dist)
 }
 
 
+int sendcount=0;
+int recvcount=0;
 // Compute the NN input state given the rover locations and the POI locations and values in the world
 VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 	VectorXd s ;
@@ -222,9 +224,6 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
 
 	}
-
-
-
 	// Compute Rover 360 Laser Data
 
 	// Initialization of ROV Laser Scan
@@ -248,23 +247,39 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 		}
 	}
 
-	std::cout << "\nPOI Laser Datas: ";
+	//std::cout << "\nPOI Laser Datas: ";
 	//printVector(POI_Laser, std::cout);
 
-	std::cout << "\nROV Laser Data: ";
+	//std::cout << "\nROV Laser Data: ";
 	//printVector(ROV_Laser, std::cout);
     //std::cout << strVector(POI_Laser) << std::endl;
     //std::cout << strVector(ROV_Laser) << std::endl;
 
     // Send
-    send(strVector(POI_Laser), "./topy");
-    send(strVector(ROV_Laser), "./topy");
+    std::string message;
+    message += "[";
+    message.append(strVector(POI_Laser));
+    message += ",";
+    message.append(strVector(ROV_Laser));
+    message += "]";
+    send(message, "./topy");
+    sendcount+=1;
+    //std::cout << "Sent: " << sendcount << " Recv: " << recvcount << std::endl;
     
     // Receive
     std::string response = recieve("./tocpp");
-    std::cout << "Response: " << response << std::endl;
-    // TODO individually parse each floating point response, and add to the state vector.
-
+    for (int i = 0; i < 8; ++i){
+        response.replace(response.find(","), 1, " ");
+    }
+    //std::cout << "Response: " << response << std::endl;
+    std::istringstream in(response);
+    for (int i = 0; i < 8; ++i)
+    {
+        in >> s[i];
+    }
+    //std::cout << s << std::endl;
+    recvcount+=1;
+    //std::cout << "Sent: " << sendcount << " Recv: " << recvcount << std::endl;
 
 	return s ;
 }
