@@ -13,38 +13,65 @@ from LaserDataset import LaserDataset
 from L1Penalty import L1Penalty
 
 # The model folder containing the model (We assume that the model is in the /models folder, so omit that initial part)
-model_folder = 'model7'
+model_folder = 'model4'
 
 # Change the model_file to point to the autoencoder you want to use
 # Format the string such that it references the AutoEncoder as a submodule
 # Example: model_file = 'models.model0.laser_cae.AutoEncoder'
-model_file = 'models.'+model_folder+'.laser_cae.AutoEncoder'
+model_file = 'models.'+model_folder+'.laser_ae.AutoEncoder'
 
-params_file = os.path.join('models', model_folder, 'conv_autoencoder_new.pth')
-log_filename = os.path.join('models', model_folder, 'train.csv')
-dataset_folder = "../build/Results/Multirover_experts/10/"
+params_file = os.path.join('models', model_folder, 'autoencoder_new.pth')
+dataset_folder = "../build/Results/Multirover_experts/0/"
 testset_folder = "../build/Results/Multirover_experts/0/"
 
 AutoEncoder = locate(model_file)
-
 if AutoEncoder==None:
     raise TypeError, "Failed to find AutoEncoder"
 
 
+class LaserDataset(TensorDataset):
+
+    def __init__(self, folder_dataset=dataset_folder, transform=None):
+        self.transform = transform
+        # Open and load text file including the whole training data
+        self.poi_laser = np.genfromtxt(folder_dataset+'poi_laser.csv', delimiter=",", dtype=np.float32)
+        # self.rov_laser = np.genfromtxt(folder_dataset+'rov_laser.csv', delimiter=",", dtype=np.float32)
+
+
+    # Override to give PyTorch access to any image on the dataset
+    def __getitem__(self, index):
+
+        poi = self.poi_laser[index,:]/43.0
+        # rov = self.rov_laser[index,:]
+
+        # laser = np.concatenate((poi, rov), axis=0)
+
+        # Convert image and label to torch tensors
+        # return torch.from_numpy(np.asarray(laser))
+        return torch.from_numpy(np.asarray(poi))
+
+    # Override to give PyTorch size of dataset
+    def __len__(self):
+        return len(self.poi_laser)
+
+
 def train():
     print("Training Model from {}".format(model_file))
-    num_epochs = 100
+    num_epochs = 10
     batch_size = 256
     learning_rate = 1e-3
 
-    print("Training Data from {}".format(dataset_folder))    
+
     dataset = LaserDataset(folder_dataset=dataset_folder, transform=None)
+    print("Training Data from {}".format(dataset_folder))    
     print("dataset of size: {}".format(len(dataset)))
+
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    
     print("Test Data from {}".format(testset_folder))    
     testset = LaserDataset(folder_dataset=testset_folder, transform=None) 
+
     print("testset of size: {}\n".format(len(testset)))
+
     testloader = DataLoader(testset, batch_size=len(testset), shuffle=False)
 
     model = AutoEncoder().cuda()
@@ -53,8 +80,6 @@ def train():
     #                              weight_decay=1e-5)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     
-    logFile = open(log_filename, 'w+')
-
     for epoch in range(num_epochs):
 
         model.train()
@@ -85,9 +110,6 @@ def train():
         # ===================log========================
         print('epoch [{}/{}], train loss:{:.4f}, test loss:{:.4f}'
               .format(epoch+1, num_epochs, loss.data[0], loss_test.data[0]))
-
-        line = "{}, {}, {}\n".format(epoch, loss.data[0], loss_test.data[0])
-        logFile.write(line)
 
     # Verify what the encoded and decoded versions look like
     # pdb.set_trace()

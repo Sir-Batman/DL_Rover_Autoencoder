@@ -9,21 +9,45 @@ import numpy as np
 import os
 import pdb
 from pydoc import locate
-from LaserDataset import LaserDataset
+
 
 # The model folder (ex. `model0`)
-model_folder = 'model7'
+model_folder = 'model4'
 
 # construct the submodule path to the autoencoder
-model_file = 'models.'+ model_folder +'.laser_cae.AutoEncoder'
+model_file = 'models.'+ model_folder +'.laser_ae.AutoEncoder'
 AutoEncoder = locate(model_file)
 if AutoEncoder==None:
     raise TypeError, "Failed to find AutoEncoder"
 
 # construct path to autoencoder parameters
-autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder_new.pth'
-log_filename = os.path.join('models', model_folder, 'encode_sample.log')
+autoencoder_param_file = 'models/'+model_folder+'/autoencoder_new.pth'
 
+
+class LaserDataset(TensorDataset):
+
+    def __init__(self, folder_dataset, transform=None):
+        self.transform = transform
+        # Open and load text file including the whole training data
+        self.poi_laser = np.genfromtxt(folder_dataset+'poi_laser.csv', delimiter=",", dtype=np.float32)
+        # self.rov_laser = np.genfromtxt(folder_dataset+'rov_laser.csv', delimiter=",", dtype=np.float32)
+
+
+    # Override to give PyTorch access to any image on the dataset
+    def __getitem__(self, index):
+
+        poi = self.poi_laser[index,:]/43.0
+        # rov = self.rov_laser[index,:]
+
+        # laser = np.concatenate((poi, rov), axis=0)
+
+        # Convert image and label to torch tensors
+        # return torch.from_numpy(np.asarray(laser))
+        return torch.from_numpy(np.asarray(poi))
+
+    # Override to give PyTorch size of dataset
+    def __len__(self):
+        return len(self.poi_laser)
 
 
 def loadModel():
@@ -43,24 +67,25 @@ def loadModel():
     return model
 
 def main():
-    
+    # pdb.set_trace()
     model = loadModel()
     model.eval()
     # sample data
-    poi_laser = np.genfromtxt(os.path.join('samples', 'train_poi_laser.csv'), delimiter=",", dtype=np.float32)/43.0
-    rov_laser = np.genfromtxt(os.path.join('samples', 'train_rov_laser.csv'), delimiter=",", dtype=np.float32)/43.0
+    poi_laser = np.genfromtxt(os.path.join('samples', 'sample_poi_laser.csv'), delimiter=",", dtype=np.float32)/43.0
+    # rov_laser = np.genfromtxt(os.path.join('samples', 'sample_rov_laser.csv'), delimiter=",", dtype=np.float32)/43.0
     # poi_laser[poi_laser==1.0] = 0.0
     # rov_laser[rov_laser==1.0] = 0.0
 
     # assume data holds your 2x360 NORMALIZED data with POI as first row, and ROV as second row
     # Note: numpy array need to have elements of dtype=np.float32
-    data = np.array((poi_laser[1], rov_laser[1]))
+    # data = np.array((poi_laser[0], rov_laser[0]))
+    data = np.array(poi_laser[0])
 
     # change type of data to be of type np.float32 in order to play nice with weights in Conv1D
-    data = data.astype(np.float32)
+    # data = data.astype(np.float32)
 
     # reshape the data so that it is in a batch size of 1
-    data = data.reshape(1, 2, 360)
+    data = data.reshape(1, 1, 360)
 
     # convert data to a tensor
     data_tensor = torch.from_numpy(np.asarray(data))
@@ -75,7 +100,6 @@ def main():
     decoded = model.decode(encoded)
 
     diff = decoded - laser_data
-    # mean_diff = 
 
     print("Initial Representation: ")
     print(laser_data)
@@ -85,16 +109,6 @@ def main():
     print(decoded)
     print("\n Diff: ")
     print(diff)
-
-    logFile = open(log_filename, "w+")
-    logFile.write("Initial Representation: \n")
-    logFile.write(str(laser_data))
-    logFile.write("\nEncoded Representation: \n")
-    logFile.write(str(encoded))
-    logFile.write("\n Decoded Representation: \n")
-    logFile.write(str(decoded))
-    logFile.write("\n Diff: \n")
-    logFile.write(str(diff))
 
 if __name__ == '__main__':
     main()

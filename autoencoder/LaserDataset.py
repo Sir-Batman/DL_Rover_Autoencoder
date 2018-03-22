@@ -10,6 +10,10 @@ class LaserDataset(TensorDataset):
         self.poi_laser = np.genfromtxt(folder_dataset+'poi_laser.csv', delimiter=",", dtype=np.float32)/43.0
         self.rov_laser = np.genfromtxt(folder_dataset+'rov_laser.csv', delimiter=",", dtype=np.float32)/43.0
 
+        if transform=="setzero":
+            self.poi_laser[self.poi_laser==1.0] = 0.0
+            self.rov_laser[self.rov_laser==1.0] = 0.0
+
 
     # Override to give PyTorch access to any image on the dataset
     def __getitem__(self, index):
