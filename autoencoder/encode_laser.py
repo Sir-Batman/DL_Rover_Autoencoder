@@ -14,7 +14,7 @@ from LaserDataset import LaserDataset
 import json
 
 # The model folder (ex. `model0`)
-model_folder = 'model1'
+model_folder = 'model7'
 
 # construct the submodule path to the autoencoder
 model_file = 'models.'+ model_folder +'.laser_cae.AutoEncoder'
@@ -23,7 +23,9 @@ if AutoEncoder==None:
     raise TypeError, "Failed to find AutoEncoder"
 
 # construct path to autoencoder parameters
-autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder_3layer.pth'
+autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder.pth'
+log_filename = os.path.join('models', model_folder, 'encode_sample.log')
+
 
 
 def loadModel():
@@ -45,14 +47,16 @@ def loadModel():
 def main():
     
     model = loadModel()
-
+    model.eval()
     # sample data
     poi_laser = np.genfromtxt(os.path.join('samples', 'train_poi_laser.csv'), delimiter=",", dtype=np.float32)/43.0
     rov_laser = np.genfromtxt(os.path.join('samples', 'train_rov_laser.csv'), delimiter=",", dtype=np.float32)/43.0
+    # poi_laser[poi_laser==1.0] = 0.0
+    # rov_laser[rov_laser==1.0] = 0.0
 
     # assume data holds your 2x360 NORMALIZED data with POI as first row, and ROV as second row
     # Note: numpy array need to have elements of dtype=np.float32
-    data = np.array((poi_laser[0], rov_laser[0]))
+    data = np.array((poi_laser[1], rov_laser[1]))
 
     # change type of data to be of type np.float32 in order to play nice with weights in Conv1D
     data = data.astype(np.float32)
@@ -72,12 +76,27 @@ def main():
     # decoded version of laser data
     decoded = model.decode(encoded)
 
+    diff = decoded - laser_data
+    # mean_diff = 
+
     print("Initial Representation: ")
     print(laser_data)
     print("\nEncoded Representation: ")
     print(encoded)
     print("\n Decoded Representation: ")
     print(decoded)
+    print("\n Diff: ")
+    print(diff)
+
+    logFile = open(log_filename, "w+")
+    logFile.write("Initial Representation: \n")
+    logFile.write(str(laser_data))
+    logFile.write("\nEncoded Representation: \n")
+    logFile.write(str(encoded))
+    logFile.write("\n Decoded Representation: \n")
+    logFile.write(str(decoded))
+    logFile.write("\n Diff: \n")
+    logFile.write(str(diff))
 
 model = None
 def forward(laser_data):
