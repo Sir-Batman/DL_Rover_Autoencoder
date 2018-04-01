@@ -148,6 +148,7 @@ int main(){
 		trainDomain.ResetEpochEvals() ;
 		trainDomain.OutputLaserData(poi_laser_fname, rov_laser_fname);
 		trainDomain.WriteLaserData();
+		std::cout << std::flush;
 	}
 
 	char NNFile[buffSize] ;

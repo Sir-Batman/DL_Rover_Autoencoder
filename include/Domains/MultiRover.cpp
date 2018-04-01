@@ -40,8 +40,10 @@ void MultiRover::InitialiseEpoch(){
 	initialPsis.clear() ;
 	for (size_t i = 0; i < nRovers; i++){
 		Vector2d initialXY ;
-		initialXY(0) = rand_interval(world[0]+rangeX/3.0,world[1]-rangeX/3.0) ;
-		initialXY(1) = rand_interval(world[2]+rangeY/3.0,world[3]-rangeX/3.0) ;
+		// initialXY(0) = rand_interval(world[0]+rangeX/3.0,world[1]-rangeX/3.0) ;
+		// initialXY(1) = rand_interval(world[2]+rangeY/3.0,world[3]-rangeX/3.0) ;
+		initialXY(0) = rand_interval(world[0]+rangeX,world[1]-rangeX) ;
+		initialXY(1) = rand_interval(world[2]+rangeY,world[3]-rangeX) ;
 		double initialPsi = rand_interval(-PI,PI) ;
 		initialXYs.push_back(initialXY) ;
 		initialPsis.push_back(initialPsi) ;
@@ -56,8 +58,8 @@ void MultiRover::InitialiseEpoch(){
 		while (!accept){
 			x = rand_interval(world[0],world[1]) ;
 			y = rand_interval(world[2],world[3]) ;
-			if (x > world[0]+rangeX/3.0 && x < world[1]-rangeX/3.0 && y > world[2]+rangeY/3.0 && y < world[3]-rangeX/3.0) {}
-			else accept = true ;
+			// if (x > world[0]+rangeX/3.0 && x < world[1]-rangeX/3.0 && y > world[2]+rangeY/3.0 && y < world[3]-rangeX/3.0) {}
+			// else accept = true ;
 		}
 		xy(0) = x ; // x location
 		xy(1) = y ; // y location
