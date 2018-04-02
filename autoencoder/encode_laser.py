@@ -14,7 +14,7 @@ from LaserDataset import LaserDataset
 import json
 
 # The model folder (ex. `model0`)
-model_folder = 'model7'
+model_folder = 'model1'
 
 # construct the submodule path to the autoencoder
 model_file = 'models.'+ model_folder +'.laser_cae.AutoEncoder'
@@ -23,7 +23,7 @@ if AutoEncoder==None:
     raise TypeError, "Failed to find AutoEncoder"
 
 # construct path to autoencoder parameters
-autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder.pth'
+autoencoder_param_file = 'models/'+model_folder+'/conv_autoencoder_3layer.pth'
 log_filename = os.path.join('models', model_folder, 'encode_sample.log')
 
 
