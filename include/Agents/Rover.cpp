@@ -198,8 +198,8 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 
 	// Maximum distance of Laser Scan Data
 	double LASER_DIST_MAX = 43.0;
-	double POI_RADIUS = 1.0;
-	double ROVER_RADIUS = 1.0;
+	double POI_RADIUS = 2.0;
+	double ROVER_RADIUS = 2.0;
 	Vector2d POIv ;
 
 	// Initialization of POI Laser Scan
@@ -307,8 +307,8 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 	// Maximum distance of Laser Scan Data
 	// sqrt(30^2 + 30^2) = 42.426 (rounded to 43)
 	double LASER_DIST_MAX = 43.0;
-	// double POI_RADIUS = 1.0;
-	// double ROVER_RADIUS = 1.0;
+	double POI_RADIUS = 1.0;
+	double ROVER_RADIUS = 1.0;
 
 	// Initialization of POI Laser Scan
 	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
@@ -330,7 +330,9 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 		// angle between our object and POI
 		double theta = atan2(POIbody(1),POIbody(0)) ;
 
-		computeLaserDataSimple(d, theta, POI_Laser);
+		// computeLaserDataSimple(d, theta, POI_Laser);
+		computeLaserDataComplex(d, theta, POI_RADIUS, POI_Laser);
+
 	}
 
 	// Compute Rover 360 Laser Data
@@ -352,7 +354,8 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 
 			double theta = atan2(rovBody(1),rovBody(0)) ;
 
-			computeLaserDataSimple(d, theta, ROV_Laser);
+			// computeLaserDataSimple(d, theta, ROV_Laser);
+			computeLaserDataComplex(d, theta, ROVER_RADIUS, ROV_Laser);
 
 		}
 	}
@@ -365,7 +368,7 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 
 void Rover::computeLaserDataSimple(double distance, double theta, std::vector<double>& laserData){
 	// Convert to Degrees and normalize angle to range [0, 360] rather than [-180, 180]
-	int theta_deg = std::round((theta * 180 / PI) + 180);
+	int theta_deg = std::round((theta * 180 / PI) + 360);
 
 
 	// If no closer object has been detected, update the laser scan data
@@ -374,33 +377,46 @@ void Rover::computeLaserDataSimple(double distance, double theta, std::vector<do
 	}
 }
 
-void Rover::computeLaserDataComplex(double distance, double theta, double object_radius, std::vector<double>& laserData){
+void Rover::computeLaserDataComplex(double distance, double angle_to_object, double object_radius, std::vector<double>& laserData){
 
 	// the angle from theta 
 	// from which the object will return laser information (in radians)
-	double angles_covered = object_radius/distance;
+	double angles_covered = std::atan(object_radius/distance);
 
 	// Convert to Degrees and normalize angle to range [0, 360] rather than [-180, 180]
-	double theta_deg = (theta * 180 / PI) + 180;		
+	double angle_to_object_deg = (angle_to_object * 180 / PI) + 360;		
 	double angles_covered_deg = angles_covered * 180 / PI;
 
-	// Compute the bounds of the angles that will be affected
-	int lower_bound = theta_deg - angles_covered_deg;
-	int upper_bound = theta_deg + angles_covered_deg;
 
-	// Loop from lower to upper bound and consider the integer angles
-	// Note: <= was used in loop comparison in order to account for lower_bound == upper bound
-	for (int i = lower_bound; i <= upper_bound; ++i){
+	// These variables match with the math in trig.jpg
+	// We use these variables to determine what the laser return should be.
+	double alpha = angle_covered_deg;
+	double d = distance;
+	double r = radius;
 
+	double gamma = 180 - 90 - alpha - 45;
+	double beta = 180 - alpha - gamma;
+
+
+	double lambda = 0;
+	double dist = 0;
+
+
+	for (int theta = 0; theta <= alpha; ++theta)
+	{
 		// Assuming roughly round object, compute the laser return signal
-		// estimated distance = distance from centers - radius of object ^ (degrees off center)
-		double dist = distance - object_radius * std::pow(0.5, std::abs(theta_deg - i));
+		lambda = 180 - theta - beta;
+		dist = std::sin(beta)*(d-r) / sin(lambda);
 
 		// If no closer object has been detected, update the laser scan data
-		if (dist < laserData[i % 360]){
-			laserData[i % 360] = dist;
+		if (dist < laserData[int(angle_to_object_deg + theta) % 360]){
+			laserData[int(angle_to_object_deg + theta) % 360] = dist;
+		}
+		if (dist < laserData[int(angle_to_object_deg - theta) % 360]){
+			laserData[int(angle_to_object_deg - theta) % 360] = dist;
 		}
 	}
+
 
 	// int angle = std::round(theta_deg);
 	// if (distance < laserData[angle % 360]){
