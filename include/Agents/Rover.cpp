@@ -379,8 +379,9 @@ void Rover::computeLaserDataSimple(double distance, double theta, std::vector<do
 
 void Rover::computeLaserDataComplex(double distance, double angle_to_object, double object_radius, std::vector<double>& laserData){
 
-	// the angle from theta 
+	// the angle from angle_to_object 
 	// from which the object will return laser information (in radians)
+	// (a) in trig.jpg
 	double angles_covered = std::atan(object_radius/distance);
 
 	// Convert to Degrees and normalize angle to range [0, 360] rather than [-180, 180]
@@ -390,9 +391,10 @@ void Rover::computeLaserDataComplex(double distance, double angle_to_object, dou
 
 	// These variables match with the math in trig.jpg
 	// We use these variables to determine what the laser return should be.
-	double alpha = angle_covered_deg;
+	// (b) in trig.jpg
+	double alpha = angles_covered_deg;
 	double d = distance;
-	double r = radius;
+	double r = object_radius;
 
 	double gamma = 180 - 90 - alpha - 45;
 	double beta = 180 - alpha - gamma;
@@ -405,6 +407,7 @@ void Rover::computeLaserDataComplex(double distance, double angle_to_object, dou
 	for (int theta = 0; theta <= alpha; ++theta)
 	{
 		// Assuming roughly round object, compute the laser return signal
+		// See (b) in trig.jpg
 		lambda = 180 - theta - beta;
 		dist = std::sin(beta)*(d-r) / sin(lambda);
 
