@@ -21,7 +21,7 @@ int main(){
 	int coupling = 2 ;        // Number of simultaneous observations required
 
 	size_t nSteps = 30 ;      // Number of timesteps in each learning epoch
-	size_t nEps = 1000 ;      // Number of learning epochs
+	size_t nEps = 10000 ;      // Number of learning epochs
 
 	size_t nInputs = 8 ;      // Dimension of state inputs to NN: keep fixed at 8
 	size_t nHidden = 16 ;     // Number of hidden units

@@ -1,5 +1,7 @@
 #include "Rover.h"
 
+
+
 Rover::Rover(size_t n, size_t nPop, string evalFunc): nSteps(n), popSize(nPop){
 	numIn = 8 ; // hard coded for 4 element input (body frame quadrant decomposition)
 	numOut = 2 ; // hard coded for 2 element output [dx,dy]
@@ -196,10 +198,7 @@ VectorXd Rover::ComputeNNInput(vector<Vector2d> jointState){
 
 	// Compute POI 360 Laser Scan Data
 
-	// Maximum distance of Laser Scan Data
-	double LASER_DIST_MAX = 43.0;
-	double POI_RADIUS = 2.0;
-	double ROVER_RADIUS = 2.0;
+
 	Vector2d POIv ;
 
 	// Initialization of POI Laser Scan
@@ -304,12 +303,6 @@ void Rover::generateLaserData(vector<Vector2d> jointState, std::ofstream& roverL
 
 	// Compute POI 360 Laser Scan Data
 
-	// Maximum distance of Laser Scan Data
-	// sqrt(30^2 + 30^2) = 42.426 (rounded to 43)
-	double LASER_DIST_MAX = 43.0;
-	double POI_RADIUS = 1.0;
-	double ROVER_RADIUS = 1.0;
-
 	// Initialization of POI Laser Scan
 	std::vector<double> POI_Laser(360, LASER_DIST_MAX);
 
@@ -409,16 +402,31 @@ void Rover::computeLaserDataComplex(double distance, double angle_to_object, dou
 		// Assuming roughly round object, compute the laser return signal
 		// See (b) in trig.jpg
 		lambda = 180 - theta - beta;
-		dist = std::sin(beta)*(d-r) / sin(lambda);
+		dist = std::sin(beta*PI/180.0)*(d-r) / std::sin(lambda*PI/180.0);
 
 		// If no closer object has been detected, update the laser scan data
 		if (dist < laserData[int(angle_to_object_deg + theta) % 360]){
-			laserData[int(angle_to_object_deg + theta) % 360] = dist;
+			laserData[int(angle_to_object_deg + theta) % 360] = std::max(0.0, dist);
 		}
 		if (dist < laserData[int(angle_to_object_deg - theta) % 360]){
-			laserData[int(angle_to_object_deg - theta) % 360] = dist;
+			laserData[int(angle_to_object_deg - theta) % 360] = std::max(0.0, dist);
 		}
+		// if (dist < 0){
+		// 	std::cout << "dist = " << dist 
+		// 	<< "\n distance to object = " << distance 
+		// 	<< "\n r = " << r 
+		// 	<< "\n beta = "<< beta 
+		// 	<< "\n sin(beta) = " << std::sin(beta)
+		// 	<< "\n lambda = " << lambda
+		// 	<< "\n sin(lambda) = " << std::sin(lambda)
+		// 	<< "\n theta = " << theta 
+		// 	<< "\n alpha = " << alpha 
+		// 	<< "\n gamma = " << gamma  
+		// 	<< "\n" << std::endl;
+		// }
 	}
+
+
 
 
 	// int angle = std::round(theta_deg);

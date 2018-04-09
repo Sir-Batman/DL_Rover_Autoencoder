@@ -85,6 +85,12 @@ class Rover{
 
 		void DifferenceEvaluationFunction(vector<Vector2d>, double) ;
 		void UpdatedStateEvaluationFunction(vector<Vector2d>, double) ;
+
+		// Maximum distance of Laser Scan Data
+		// sqrt(30^2 + 30^2) = 42.426 (rounded to 43)
+		double LASER_DIST_MAX = 43.0;
+		double POI_RADIUS = 1.0;
+		double ROVER_RADIUS = 1.0;
 } ;
 
 template <class T>
