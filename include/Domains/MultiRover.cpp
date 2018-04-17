@@ -26,39 +26,86 @@ MultiRover::~MultiRover(){
 }
 
 void MultiRover::InitialiseEpoch(){
+	/* When using randomly generated worlds, this function is called every 
+	 * learning episode. (Is called after the policies are evaluated and evolved)
+	 * 
+	 * Modified in this branch: Changed POI generation to make the POI placement
+	 * be permanent, but each POI has a n% chance to appear/dissapear
+	 * n should be chosen based on the number of learning episodes so that
+	 * the world slowly transitions from one state to another, to another...
+	 */
 	double rangeX = world[1] - world[0] ;
 	double rangeY = world[3] - world[2] ;
 
-	initialXYs.clear() ;
-	initialPsis.clear() ;
-	for (size_t i = 0; i < nRovers; i++){
-		Vector2d initialXY ;
-		initialXY(0) = rand_interval(world[0]+rangeX/3.0,world[1]-rangeX/3.0) ;
-		initialXY(1) = rand_interval(world[2]+rangeY/3.0,world[3]-rangeX/3.0) ;
-		double initialPsi = rand_interval(-PI,PI) ;
-		initialXYs.push_back(initialXY) ;
-		initialPsis.push_back(initialPsi) ;
-	}
-
-	// POI locations and values in global frame (restricted to within outer regions of 9 grid)
-	POIs.clear() ;
-	for (size_t p = 0; p < nPOIs; p++){
-		Vector2d xy ;
-		double x, y ;
-		bool accept = false ;
-		while (!accept){
-			x = rand_interval(world[0],world[1]) ;
-			y = rand_interval(world[2],world[3]) ;
-			if (x > world[0]+rangeX/3.0 && x < world[1]-rangeX/3.0 && y > world[2]+rangeY/3.0 && y < world[3]-rangeX/3.0) {}
-			else accept = true ;
+	if (POIs.size() == 0)
+	{
+		/* Initial run, make the POI's in random places */
+		initialXYs.clear() ;
+		initialPsis.clear() ;
+		for (size_t i = 0; i < nRovers; i++){
+			Vector2d initialXY ;
+			initialXY(0) = rand_interval(world[0]+rangeX/3.0,world[1]-rangeX/3.0) ;
+			initialXY(1) = rand_interval(world[2]+rangeY/3.0,world[3]-rangeX/3.0) ;
+			double initialPsi = rand_interval(-PI,PI) ;
+			initialXYs.push_back(initialXY) ;
+			initialPsis.push_back(initialPsi) ;
 		}
-		xy(0) = x ; // x location
-		xy(1) = y ; // y location
-		double v = rand_interval(1,10) ; // value
-		if (coupling > 1)
-			POIs.push_back(Target(xy,v,coupling)) ;
-		else
-			POIs.push_back(Target(xy,v)) ;
+
+		// POI locations and values in global frame (restricted to within outer regions of 9 grid)
+		POIs.clear() ;
+		for (size_t p = 0; p < nPOIs; p++){
+			Vector2d xy ;
+			double x, y ;
+			bool accept = false ;
+			while (!accept){
+				x = rand_interval(world[0],world[1]) ;
+				y = rand_interval(world[2],world[3]) ;
+				if (x > world[0]+rangeX/3.0 && x < world[1]-rangeX/3.0 && y > world[2]+rangeY/3.0 && y < world[3]-rangeX/3.0) {}
+				else accept = true ;
+			}
+			xy(0) = x ; // x location
+			xy(1) = y ; // y location
+			double v = rand_interval(1,10) ; // value
+			if (coupling > 1)
+				POIs.push_back(Target(xy,v,coupling)) ;
+			else
+				POIs.push_back(Target(xy,v)) ;
+		}
+	}
+	else
+	{
+		/* After the initial run, randomly change the POI positions
+		 * based on the random threshold */
+		int threshold = 5; // Percent threshold
+		for (size_t p = 0; p < nPOIs; ++p)
+		{
+			if (rand_interval(0,100) < threshold)
+			{
+				/* Change the POI placement */
+				Vector2d xy ;
+				double x, y ;
+				bool accept = false ;
+				while (!accept){
+					x = rand_interval(world[0],world[1]) ;
+					y = rand_interval(world[2],world[3]) ;
+					if (x > world[0]+rangeX/3.0 && x < world[1]-rangeX/3.0 && y > world[2]+rangeY/3.0 && y < world[3]-rangeX/3.0)
+					{/* PASS */}
+					else
+					{ accept = true ; }
+				}
+				xy(0) = x ; // x location
+				xy(1) = y ; // y location
+				double v = rand_interval(1,10) ; // value
+				if (coupling > 1)
+				{
+					POIs[p] = Target(xy,v,coupling) ;
+				}
+				else
+				{
+					POIs[p] = Target(xy,v) ;
+				}
+			}
+		}
 	}
 }
 
