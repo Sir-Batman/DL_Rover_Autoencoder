@@ -35,12 +35,15 @@ def loadModel():
     model = AutoEncoder().cuda()
 
     # load model parameters into dictionary
+    # SKIP LOADING PARAMETERS FOR RANDOM COMPARISON
+    '''
     print('Loading model parameters...')
     pretrained_dict = torch.load(autoencoder_param_file)
     model_dict = model.state_dict()
     for key, value in pretrained_dict.iteritems():
         model_dict[key] = value
     model.load_state_dict(model_dict)
+    '''
 
     return model
 
@@ -139,7 +142,10 @@ if __name__ == '__main__':
         #ROV_data = comms.recieve("../topy")
         recv+=1
         #print "recv: " , recv, "sent", sent
-        data = json.loads(data)
+        try:
+            data = json.loads(data)
+        except:
+            print "fail: ", data
         POI_data = data[0]
         ROV_data = data[1]
         laser_data = np.array([POI_data, ROV_data])
