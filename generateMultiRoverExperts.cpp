@@ -16,23 +16,23 @@ int main(){
 	world.push_back(0.0) ; 
 	world.push_back(30.0) ;   // Dimensions of testing arena [xmin, xmax, ymin, ymax]
 
-	size_t rovs = 10 ;        // Number of rovers
-	size_t nPOIs = 20 ;       // Number of POIs
+	size_t rovs = 5;        // Number of rovers
+	size_t nPOIs = 10 ;       // Number of POIs
 	int coupling = 1 ;        // Number of simultaneous observations required
 
 	size_t nSteps = 30 ;      // Number of timesteps in each learning epoch
-	size_t nEps = 1000 ;      // Number of learning epochs
+	size_t nEps = 2000 ;      // Number of learning epochs
 
 	size_t nInputs = 8 ;      // Dimension of state inputs to NN: keep fixed at 8
 	size_t nHidden = 16 ;     // Number of hidden units
 	size_t nOutputs = 2 ;     // Dimension of action outputs of NN: keep fixed at 2
 
-	size_t nPop = 15 ;        // Number of members in original population
+	size_t nPop = 100 ;        // Number of members in original population
 	string evalFunc = "D" ;   // Fitness evaluation function {"D","G"}
 
 	std::cout << "Generating expert policies for rover domain using " << evalFunc << " fitness.\n" ;
 
-	int staticOrRandom = 0 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
+	int staticOrRandom = 1 ;  // 0 - training epochs use the same POI and rover initial configuration, 1 - randomized configurations for each learning epoch. Note that each of the 2k multiagent teams in each epoch are still trained on the same configuration.
 
 	std::cout << "This program will evolve a " << rovs << "-rover team over " << nEps << " learning epochs, each of " << nSteps << " timesteps.\n" ;
 	std::cout << "Rover NN control policy parameters:\n" ;
